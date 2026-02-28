@@ -1,0 +1,8 @@
+# Nixpacks config for Railway
+# mysqlclient needs MySQL client libraries
+
+[phases.setup]
+nixPkgs = ["...", "mysql80"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
