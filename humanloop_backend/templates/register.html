@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'register.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}"></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'index' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+
+            <div class="nav-links"></div>
+
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <span class="nav-auth-text">Already have an account?</span>
+                <a href="{% url 'login' %}" class="btn btn-secondary btn-sm">Log in</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="auth-container">
+        <div class="card auth-card auth-card-lg">
+            <div class="auth-header">
+                <h2>Create your account</h2>
+                <p>Start planning smarter community initiatives today.</p>
+            </div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="org_name">Organization/Name</label>
+                    <input type="text" id="org_name" class="input-field" placeholder="e.g. NSS Unit - Delhi University"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <select id="role" class="input-field" required>
+                        <option value="" disabled selected>Select your role...</option>
+                        <option value="innovator">💡 Innovator</option>
+                        <option value="ngo">🏢 NGO Partner</option>
+                        <option value="beneficiary">✅ Beneficiary</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Work Email</label>
+                    <input type="email" id="email" class="input-field" placeholder="name@organization.org" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Create Password</label>
+                    <input type="password" id="password" class="input-field" placeholder="Must be at least 8 characters"
+                        required>
+                    <!-- Password Requirements Checklist -->
+                    <div class="password-requirements" id="passwordRequirements">
+                        <div class="req-item" id="reqLength">
+                            <span class="req-dot"></span>
+                            <span>At least 8 characters</span>
+                        </div>
+                        <div class="req-item" id="reqCapital">
+                            <span class="req-dot"></span>
+                            <span>One uppercase letter</span>
+                        </div>
+                        <div class="req-item" id="reqNumber">
+                            <span class="req-dot"></span>
+                            <span>One number</span>
+                        </div>
+                        <div class="req-item" id="reqSymbol">
+                            <span class="req-dot"></span>
+                            <span>One special symbol (!@#$...)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" class="input-field" placeholder="Re-enter your password"
+                        required>
+                    <div class="password-mismatch" id="passwordMismatch">
+                        <i class="fa-solid fa-circle-exclamation"></i> Passwords do not match
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" id="registerBtn">Get Started &rarr;</button>
+            </form>
+
+            <div class="register-terms">
+                By signing up, you agree to our <a href="#" class="link-underline">Terms of Service</a> and
+                <a href="#" class="link-underline">Privacy Policy</a>.
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Script -->
+    <script>
+        // Password requirement validation
+        const pwdInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirmPassword');
+        const mismatchMsg = document.getElementById('passwordMismatch');
+
+        const checks = {
+            reqLength: v => v.length >= 8,
+            reqCapital: v => /[A-Z]/.test(v),
+            reqNumber: v => /[0-9]/.test(v),
+            reqSymbol: v => /[^A-Za-z0-9]/.test(v)
+        };
+
+        pwdInput.addEventListener('input', () => {
+            const val = pwdInput.value;
+            for (const [id, test] of Object.entries(checks)) {
+                const el = document.getElementById(id);
+                el.classList.toggle('met', test(val));
+            }
+            // Also check confirm match if confirm has value
+            if (confirmInput.value) {
+                mismatchMsg.classList.toggle('visible', confirmInput.value !== val);
+            }
+        });
+
+        confirmInput.addEventListener('input', () => {
+            mismatchMsg.classList.toggle('visible', confirmInput.value !== pwdInput.value);
+        });
+
+        function allPasswordReqsMet() {
+            const val = pwdInput.value;
+            return Object.values(checks).every(test => test(val));
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Check password requirements
+            if (!allPasswordReqsMet()) {
+                document.getElementById('passwordRequirements').classList.add('shake');
+                setTimeout(() => document.getElementById('passwordRequirements').classList.remove('shake'), 600);
+                return;
+            }
+
+            // Check password match
+            if (pwdInput.value !== confirmInput.value) {
+                mismatchMsg.classList.add('visible');
+                mismatchMsg.classList.add('shake');
+                setTimeout(() => mismatchMsg.classList.remove('shake'), 600);
+                return;
+            }
+
+            const email = document.getElementById('email').value.trim();
+            const role = document.getElementById('role').value;
+            const orgName = document.getElementById('org_name').value.trim();
+            const password = pwdInput.value;
+            const btn = document.getElementById('registerBtn');
+
+            // Show loading state
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating account...';
+
+            // Show or create error message element
+            let errorEl = document.getElementById('register-error');
+            if (!errorEl) {
+                errorEl = document.createElement('div');
+                errorEl.id = 'register-error';
+                errorEl.style.cssText = 'color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:0.75rem 1rem;font-size:0.875rem;margin-bottom:1rem;display:none;';
+                document.getElementById('registerForm').prepend(errorEl);
+            }
+            errorEl.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/register/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: orgName, email, password, role, organization: orgName })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Also cache in localStorage for RBAC
+                    const users = JSON.parse(localStorage.getItem('humanloop_registered_users') || '[]');
+                    const filtered = users.filter(u => u.email.toLowerCase() !== email.toLowerCase());
+                    filtered.push({ email, role, orgName, registeredAt: new Date().toISOString() });
+                    localStorage.setItem('humanloop_registered_users', JSON.stringify(filtered));
+
+                    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Account created! Redirecting...';
+                    btn.style.background = '#0D9488';
+                    setTimeout(() => { window.location.href = '/login/'; }, 1200);
+                } else {
+                    errorEl.textContent = data.error || 'Registration failed. Please try again.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Get Started &rarr;';
+                }
+            } catch (err) {
+                errorEl.textContent = 'Network error. Please check your connection and try again.';
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = 'Get Started &rarr;';
+            }
+        });
+    </script>
+
+
+    <script>
+        // Django-injected user data
+        window.__USER__ = {{ user_json|safe }};
+    </script>
+</body>
+
+</html>

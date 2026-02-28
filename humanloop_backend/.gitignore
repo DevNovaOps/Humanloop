@@ -1,0 +1,47 @@
+# ── Python ───────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ── Virtual Environment ─────────────────────────────────────
+venv/
+env/
+.venv/
+
+# ── Environment Variables (NEVER commit secrets) ─────────────
+.env
+
+# ── Django ───────────────────────────────────────────────────
+*.log
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+
+# ── IDE / Editor ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── OS Files ─────────────────────────────────────────────────
+desktop.ini
+.DS_Store
+
+# ── Temporary / Build files ──────────────────────────────────
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Fix scripts (dev only) ──────────────────────────────────
+fix_*.py
+setup_templates.py
+
+# ── Gemini / AI Assistant ────────────────────────────────────
+.gemini/
+.agents/

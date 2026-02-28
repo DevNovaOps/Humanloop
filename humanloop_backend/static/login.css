@@ -1,0 +1,391 @@
+/* ═══════════════════════════════════════════
+   LOGIN PAGE — HumanLoop Theme
+   ═══════════════════════════════════════════ */
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    background: var(--hl-gradient);
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(26, 86, 219, 0.2);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.form-header-group {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.label-no-margin {
+    margin-bottom: 0;
+}
+
+.link-primary {
+    font-size: 0.85rem;
+    color: var(--hl-blue);
+    font-weight: 500;
+}
+
+.link-primary:hover {
+    color: var(--hl-teal);
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.auth-footer {
+    margin-top: 2rem;
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+}
+
+.auth-secure-text {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.nav-auth-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-right: 1rem;
+}
+
+/* ═══════════════════════════════════════════
+   LOCK ICON ANIMATIONS
+   ═══════════════════════════════════════════ */
+
+/* Phase 1: Shake */
+.auth-icon-wrapper.lock-shake {
+    animation: iconShake 0.5s ease-in-out 2;
+}
+
+@keyframes iconShake {
+
+    0%,
+    100% {
+        transform: translateX(0) rotate(0deg);
+    }
+
+    15% {
+        transform: translateX(-5px) rotate(-4deg);
+    }
+
+    30% {
+        transform: translateX(5px) rotate(4deg);
+    }
+
+    45% {
+        transform: translateX(-4px) rotate(-3deg);
+    }
+
+    60% {
+        transform: translateX(4px) rotate(3deg);
+    }
+
+    75% {
+        transform: translateX(-2px) rotate(-1deg);
+    }
+
+    85% {
+        transform: translateX(2px) rotate(1deg);
+    }
+}
+
+/* Phase 2: Unlocking — slight grow */
+.auth-icon-wrapper.lock-unlocking {
+    transform: scale(1.1);
+}
+
+/* Phase 2b: Success color — gradient shifts to green */
+.auth-icon-wrapper.lock-success {
+    background: linear-gradient(135deg, #10B981 0%, #2DD4BF 100%);
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35),
+        0 0 40px rgba(16, 185, 129, 0.15);
+}
+
+/* Phase 3: Bounce */
+.auth-icon-wrapper.lock-bounce {
+    animation: lockBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes lockBounce {
+    0% {
+        transform: scale(1.1);
+    }
+
+    40% {
+        transform: scale(1.35);
+    }
+
+    70% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1.25);
+    }
+}
+
+/* ═══════════════════════════════════════════
+   FORM EXIT ANIMATION
+   ═══════════════════════════════════════════ */
+
+.login-form-exit {
+    animation: formFadeOut 0.5s ease forwards;
+    pointer-events: none;
+}
+
+.login-text-exit {
+    animation: textSlideOut 0.4s ease forwards;
+}
+
+@keyframes formFadeOut {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(20px);
+        max-height: 0;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+}
+
+@keyframes textSlideOut {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+}
+
+/* ═══════════════════════════════════════════
+   SUCCESS MESSAGE
+   ═══════════════════════════════════════════ */
+
+.login-success-msg {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.login-success-msg.visible {
+    display: flex;
+    animation: successFadeIn 0.6s ease forwards;
+}
+
+.login-success-msg h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #10B981;
+    margin-bottom: 0.35rem;
+}
+
+.login-success-msg p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+@keyframes successFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* --- Animated Checkmark Ring --- */
+.success-checkmark-ring {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 1rem;
+}
+
+.success-checkmark-ring svg {
+    width: 100%;
+    height: 100%;
+}
+
+.success-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    animation: circleStroke 0.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.success-check {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: checkStroke 0.4s cubic-bezier(0.65, 0, 0.35, 1) 0.4s forwards;
+}
+
+@keyframes circleStroke {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes checkStroke {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* ═══════════════════════════════════════════
+   CARD SUCCESS GLOW
+   ═══════════════════════════════════════════ */
+
+.auth-card.card-success-glow {
+    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.15),
+        0 0 60px rgba(16, 185, 129, 0.08),
+        0 20px 60px rgba(0, 0, 0, 0.1);
+    animation: cardGlowPulse 1s ease infinite;
+}
+
+@keyframes cardGlowPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.15),
+            0 0 60px rgba(16, 185, 129, 0.08);
+    }
+
+    50% {
+        box-shadow: 0 0 40px rgba(16, 185, 129, 0.25),
+            0 0 80px rgba(16, 185, 129, 0.12);
+    }
+}
+
+/* ═══════════════════════════════════════════
+   ROLE DROPDOWN SELECTOR
+   ═══════════════════════════════════════════ */
+
+.select-wrapper {
+    position: relative;
+}
+
+.role-dropdown {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    padding-right: 2.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.role-dropdown option {
+    padding: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.select-arrow {
+    position: absolute;
+    right: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+}
+
+.select-wrapper:hover .select-arrow {
+    color: var(--hl-blue);
+}
+
+/* ═══════════════════════════════════════════
+   PASSWORD REQUIREMENTS CHECKLIST
+   ═══════════════════════════════════════════ */
+
+.password-requirements {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+    padding-left: 0.15rem;
+}
+
+.req-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    transition: color 0.25s ease;
+}
+
+.req-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    flex-shrink: 0;
+    transition: background 0.25s ease;
+}
+
+.req-item.met {
+    color: var(--hl-blue, #1A56DB);
+}
+
+.req-item.met .req-dot {
+    background: var(--hl-blue, #1A56DB);
+}
+
+/* Shake animation for unmet requirements */
+.password-requirements.shake {
+    animation: reqShake 0.5s ease-in-out;
+}
+
+@keyframes reqShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-4px);
+    }
+
+    40% {
+        transform: translateX(4px);
+    }
+
+    60% {
+        transform: translateX(-3px);
+    }
+
+    80% {
+        transform: translateX(3px);
+    }
+}

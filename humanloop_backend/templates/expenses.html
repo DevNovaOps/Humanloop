@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'expenses.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}?v=2"></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'dashboard' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+
+            <div class="nav-links"></div>
+
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <div class="nav-user-profile">
+                    <span class="text-medium-sm">Akshat (NSS Leader)</span>
+                    <div class="avatar-sm"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-section-title">Main Menu</div>
+            <nav class="sidebar-nav">
+                <!-- Dynamically rendered by script.js based on user role -->
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <a href="{% url 'pilot' %}" id="back-link" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to
+                Pilot</a>
+
+            <div class="expenses-header">
+                <div>
+                    <h1 class="h1-margin-sm">Expense Tracker</h1>
+                    <p id="expense-subtitle">Track spending for your pilot initiatives.</p>
+                </div>
+                <div class="card budget-remaining-card">
+                    <span class="budget-remaining-label">Total Spent</span>
+                    <span class="budget-remaining-value" id="budget-remaining">₹{{ total_spent|floatformat:"0" }}</span>
+                </div>
+            </div>
+
+            {% if pilots %}
+            <div style="margin-bottom:1.5rem;">
+                <label for="pilot-select" style="font-weight:600;margin-right:0.5rem;">Select Pilot:</label>
+                <select id="pilot-select" class="input-field" style="max-width:300px;display:inline-block;" onchange="window.location.href='/expenses/?pilot_id='+this.value">
+                    <option value="">All Pilots</option>
+                    {% for p in pilots %}
+                    <option value="{{ p.id }}" {% if selected_pilot_id == p.id %}selected{% endif %}>{{ p.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <div class="expenses-grid">
+                <!-- Expense Log -->
+                <div class="card">
+                    <h3 class="h1-margin-sm">Expense Log</h3>
+                    <div id="expense-list" style="margin-top: 1rem;">
+                        {% if expenses %}
+                        <div style="display:flex;flex-direction:column;gap:0.8rem;">
+                            {% for ex in expenses %}
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;background:var(--bg-surface-hover);border-radius:8px;border:1px solid var(--border-color);">
+                                <div>
+                                    <div style="font-weight:600;color:var(--text-primary);">{{ ex.item }}</div>
+                                    <div style="font-size:0.85rem;color:var(--text-muted);">{{ ex.date }} · {{ ex.pilot.title }}</div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:1rem;">
+                                    <span style="font-weight:700;color:var(--text-primary);">₹{{ ex.amount|floatformat:"0" }}</span>
+                                    {% if user.role == 'ngo' or user.role == 'admin' %}
+                                    <button onclick="deleteExpense({{ ex.id }})" style="color:#ef4444;background:none;border:none;cursor:pointer;" title="Delete">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p style="color:var(--text-muted);text-align:center;padding:2rem;">No expenses recorded yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if user.role == 'ngo' or user.role == 'admin' %}
+                <!-- Add Expense Form (NGO/Admin only) -->
+                <div class="card">
+                    <h3 class="h1-margin-sm">Add Expense</h3>
+                    <form id="expense-form" style="margin-top: 1rem;">
+                        <div class="form-group">
+                            <label for="pilot_id">Pilot</label>
+                            <select id="pilot_id" name="pilot_id" class="input-field" required>
+                                {% for p in pilots %}
+                                <option value="{{ p.id }}">{{ p.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="item">Item / Description</label>
+                            <input type="text" id="item" name="item" class="input-field"
+                                placeholder="e.g. Stationery supplies" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">Amount (₹)</label>
+                            <input type="number" id="amount" name="amount" class="input-field" placeholder="e.g. 1500"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" name="date" class="input-field" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;"><i
+                                class="fa-solid fa-plus icon-margin-right"></i> Add Expense</button>
+                    </form>
+                </div>
+                {% else %}
+                <!-- Read-only budget info for Innovators -->
+                <div class="card">
+                    <h3 class="h1-margin-sm">Budget Summary</h3>
+                    <p style="color:var(--text-muted);font-size:0.88rem;margin-top:0.75rem;">You can view how your budget is being spent by the NGO. Only the assigned NGO can add or remove expenses.</p>
+                    <div style="margin-top:1rem;padding:1rem;background:var(--bg-tertiary);border-radius:10px;text-align:center;">
+                        <i class="fa-solid fa-eye" style="font-size:1.5rem;color:var(--primary);opacity:0.5;display:block;margin-bottom:0.5rem;"></i>
+                        <span style="font-size:0.85rem;color:var(--text-muted);">Read-only access</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+
+    <script>
+        // Django-injected user data
+        window.__USER__ = {{ user_json|safe }};
+
+        // Add expense form handler
+        document.getElementById('expense-form')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const pilotId = document.getElementById('pilot_id').value;
+            const item = document.getElementById('item').value;
+            const amount = document.getElementById('amount').value;
+            const date = document.getElementById('date').value;
+
+            try {
+                const res = await fetch(`/api/pilots/${pilotId}/expenses/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ item, amount: parseFloat(amount), date })
+                });
+                const data = await res.json();
+                if (data.success || res.ok) {
+                    location.reload();
+                } else {
+                    alert(data.error || 'Failed to add expense');
+                }
+            } catch (err) {
+                alert('Network error');
+            }
+        });
+
+        async function deleteExpense(expenseId) {
+            if (!confirm('Delete this expense?')) return;
+            try {
+                const res = await fetch(`/api/expenses/${expenseId}/delete/`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (res.ok) location.reload();
+                else alert('Failed to delete');
+            } catch (err) {
+                alert('Network error');
+            }
+        }
+    </script>
+</body>
+
+</html>

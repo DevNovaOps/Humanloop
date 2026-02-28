@@ -1,0 +1,125 @@
+/* ═══════════════════════════════════════════
+   REGISTER PAGE — HumanLoop Theme
+   ═══════════════════════════════════════════ */
+
+.auth-card-lg {
+    max-width: 420px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.nav-auth-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-right: 1rem;
+}
+
+.register-terms {
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.link-underline {
+    text-decoration: underline;
+    color: var(--hl-blue);
+}
+
+.link-underline:hover {
+    color: var(--hl-teal);
+}
+
+/* ═══════════════════════════════════════════
+   PASSWORD REQUIREMENTS CHECKLIST
+   ═══════════════════════════════════════════ */
+
+.password-requirements {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+    padding-left: 0.15rem;
+}
+
+.req-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    transition: color 0.25s ease;
+}
+
+.req-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    flex-shrink: 0;
+    transition: background 0.25s ease;
+}
+
+.req-item.met {
+    color: var(--hl-blue, #1A56DB);
+}
+
+.req-item.met .req-dot {
+    background: var(--hl-blue, #1A56DB);
+}
+
+/* Shake animation for unmet requirements */
+.password-requirements.shake,
+.password-mismatch.shake {
+    animation: reqShake 0.5s ease-in-out;
+}
+
+@keyframes reqShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-4px);
+    }
+
+    40% {
+        transform: translateX(4px);
+    }
+
+    60% {
+        transform: translateX(-3px);
+    }
+
+    80% {
+        transform: translateX(3px);
+    }
+}
+
+/* ═══════════════════════════════════════════
+   PASSWORD MISMATCH MESSAGE
+   ═══════════════════════════════════════════ */
+
+.password-mismatch {
+    display: none;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    color: #ef4444;
+    font-weight: 500;
+}
+
+.password-mismatch.visible {
+    display: flex;
+}

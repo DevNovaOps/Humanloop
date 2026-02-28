@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static '403.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'index' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="access-denied-container">
+        <div class="access-denied-card card">
+            <div class="denied-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h1>Access Denied</h1>
+            <p class="denied-subtitle">You don't have permission to access this page.</p>
+            <p class="denied-detail" id="deniedDetail">Your current role does not have the required privileges to view
+                this resource. Please contact your administrator for access.</p>
+            <div class="denied-actions">
+                <a href="javascript:void(0)" class="btn btn-primary" id="goToDashboard">Go to Dashboard</a>
+                <a href="{% url 'login' %}" class="btn btn-secondary">Switch Account</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('goToDashboard').addEventListener('click', () => {
+            const user = AuthManager.getUser();
+            if (user) window.location.href = RBAC.getDashboardForRole(user.role);
+            else window.location.href = '{% url 'login' %}';
+        });
+        const user = AuthManager.getUser();
+        if (user) {
+            document.getElementById('deniedDetail').innerHTML = `You are signed in as <strong>${RBAC.roleLabels[user.role]}</strong>. This page requires a different permission level.`;
+        }
+    </script>
+
+    <script>
+        // Django-injected user data
+        window.__USER__ = {{ user_json|safe }};
+    </script>
+</body>
+
+</html>

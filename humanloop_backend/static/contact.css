@@ -1,0 +1,244 @@
+/* ═══════════════════════════════════════════
+   CONTACT PAGE — HumanLoop Theme
+   ═══════════════════════════════════════════ */
+
+/* ─── Page Hero ─── */
+.page-hero {
+    padding: 6rem 0 3rem;
+    text-align: center;
+    background: linear-gradient(135deg, var(--hl-blue-light) 0%, var(--hl-teal-light) 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .page-hero,
+[data-theme="system"] .page-hero {
+    background: linear-gradient(135deg, rgba(26, 86, 219, 0.12) 0%, rgba(13, 148, 136, 0.10) 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+    [data-theme="system"] .page-hero {
+        background: linear-gradient(135deg, rgba(26, 86, 219, 0.12) 0%, rgba(13, 148, 136, 0.10) 100%);
+    }
+}
+
+.page-hero h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, var(--hl-blue), var(--hl-teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-hero p {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ─── Page Content ─── */
+.page-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+}
+
+/* ─── Contact Sections ─── */
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+}
+
+.contact-info-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.contact-info-card {
+    padding: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.contact-info-card .contact-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--hl-blue), var(--hl-teal));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+}
+
+.contact-info-card h4 {
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+.contact-info-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.contact-form-card {
+    padding: 2rem;
+}
+
+.contact-form-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.contact-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.contact-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.contact-form textarea.input-field {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* ─── Footer ─── */
+.footer-brand {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.footer-description {
+    font-size: 0.9rem;
+}
+
+.footer-heading {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.footer-list {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.footer-item {
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.footer-item:hover {
+    color: var(--hl-blue);
+}
+
+.footer-item a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.footer-item a:hover {
+    color: var(--hl-blue);
+}
+
+.footer-copyright {
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+.footer-grid {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.footer-grid>div:first-child {
+    max-width: 300px;
+}
+
+/* ─── Responsive — Tablet ─── */
+@media (max-width: 1024px) {
+    .page-hero {
+        padding: 5rem 0 2.5rem;
+    }
+}
+
+/* ─── Responsive — Mobile ─── */
+@media (max-width: 768px) {
+    .page-hero {
+        padding: 4rem 0 2rem;
+    }
+
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-form .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .page-hero h1 {
+        font-size: 1.75rem;
+    }
+
+    .page-hero p {
+        font-size: 1rem;
+    }
+
+    .page-content {
+        padding: 2rem 1rem 3rem;
+    }
+
+    .footer-grid {
+        flex-direction: column !important;
+        gap: 2rem !important;
+    }
+
+    .footer-grid>div {
+        max-width: 100% !important;
+    }
+}
+
+/* ─── Responsive — Small Mobile ─── */
+@media (max-width: 480px) {
+    .page-hero {
+        padding: 3.5rem 0 1.5rem;
+    }
+
+    .page-hero h1 {
+        font-size: 1.5rem;
+    }
+
+    .page-content {
+        padding: 1.5rem 0.75rem 2.5rem;
+    }
+
+    .contact-info-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .contact-form-card {
+        padding: 1.5rem;
+    }
+}

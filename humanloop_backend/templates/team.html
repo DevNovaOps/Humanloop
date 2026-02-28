@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'team.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}?v=2"></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'dashboard' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+
+            <div class="nav-links"></div>
+
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <div class="nav-user-profile">
+                    <span class="text-medium-sm">{{ user.name|default:"User" }}</span>
+                    <div class="avatar-sm"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-section-title">Main Menu</div>
+            <nav class="sidebar-nav">
+                <a href="{% url 'dashboard' %}"><i class="fa-solid fa-chart-pie"></i> Overview</a>
+                <a href="{% url 'planner' %}"><i class="fa-solid fa-calendar-plus"></i> Plan New Pilot</a>
+                <a href="{% url 'pilot' %}"><i class="fa-solid fa-bars-progress"></i> Active Pilots</a>
+
+                <hr class="sidebar-divider-hr">
+                <a href="{% url 'settings' %}"><i class="fa-solid fa-gear"></i> Settings</a>
+                <a href="{% url 'team' %}" class="active"><i class="fa-solid fa-users"></i> Team</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="team-header">
+                <div>
+                    <h1 class="h1-margin-sm">Team Members</h1>
+                    <p>Manage your team and department leads.</p>
+                </div>
+                <div id="member-cta" style="display:none;margin-top:0.5rem;">
+                </div>
+                <button class="btn btn-primary btn-sm" id="add-member-btn"><i
+                        class="fa-solid fa-user-plus icon-margin-right"></i> Add
+                    Member</button>
+            </div>
+
+
+
+            <div id="team-grid-container">
+                <!-- member cards will be inserted here by JS -->
+                <div class="team-grid" id="team-grid">
+                    <div class="member-card" id="team-loading-state"
+                        style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:2rem;">
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size:1.5rem;"></i>
+                        <p style="margin-top:0.75rem;">Loading team members…</p>
+                    </div>
+                </div>
+            </div>
+
+
+        </main>
+    </div>
+
+    <!-- Invite Member Modal -->
+    <div id="add-member-modal"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
+        <div
+            style="background:var(--bg-surface);border-radius:16px;padding:2rem;max-width:420px;width:90%;border:1px solid var(--border-color);box-shadow:0 10px 40px rgba(0,0,0,0.15);animation:modalFadeIn 0.25s ease;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+                <h3 style="margin:0;color:var(--text-primary);"><i class="fa-solid fa-user-plus"
+                        style="color:#1A56DB;margin-right:0.5rem;"></i>Add Team Member</h3>
+                <button id="close-modal-btn"
+                    style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1.1rem;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.15s;"
+                    onmouseover="this.style.background='var(--bg-secondary)'"
+                    onmouseout="this.style.background='none'"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="add-member-form">
+                <div style="margin-bottom:1rem;">
+                    <label
+                        style="display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.4rem;">Email
+                        Address</label>
+                    <input type="email" name="member-email" required placeholder="e.g. member@example.org"
+                        style="width:100%;padding:0.65rem 0.85rem;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-secondary);color:var(--text-primary);font-size:0.9rem;outline:none;transition:border-color 0.2s;box-sizing:border-box;"
+                        onfocus="this.style.borderColor='#1A56DB'"
+                        onblur="this.style.borderColor='var(--border-color)'">
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <label
+                        style="display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.4rem;">Full
+                        Name <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="member-name" required minlength="2" placeholder="e.g. Rahul Verma"
+                        style="width:100%;padding:0.65rem 0.85rem;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-secondary);color:var(--text-primary);font-size:0.9rem;outline:none;transition:border-color 0.2s;box-sizing:border-box;"
+                        onfocus="this.style.borderColor='#1A56DB'"
+                        onblur="this.style.borderColor='var(--border-color)'">
+                </div>
+                <div style="margin-bottom:1.5rem;">
+                    <label
+                        style="display:block;font-size:0.85rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.4rem;">Role</label>
+                    <select name="member-role" required
+                        style="width:100%;padding:0.65rem 0.85rem;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-secondary);color:var(--text-primary);font-size:0.9rem;outline:none;transition:border-color 0.2s;box-sizing:border-box;"
+                        onfocus="this.style.borderColor='#1A56DB'"
+                        onblur="this.style.borderColor='var(--border-color)'">
+                        <option value="" disabled selected>Select a role</option>
+                        <option value="Member">Member</option>
+                        <option value="Team Lead">Team Lead</option>
+                        <option value="Field Coordinator">Field Coordinator</option>
+                        <option value="Budget Manager">Budget Manager</option>
+                        <option value="Data Analyst">Data Analyst</option>
+                        <option value="Community Organizer">Community Organizer</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+                    <button type="button" id="cancel-modal-btn" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i
+                            class="fa-solid fa-user-plus icon-margin-right"></i>Add Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const addBtn = document.getElementById('add-member-btn');
+            const modal = document.getElementById('add-member-modal');
+            const closeBtn = document.getElementById('close-modal-btn');
+            const cancelBtn = document.getElementById('cancel-modal-btn');
+            const form = document.getElementById('add-member-form');
+            const grid = document.getElementById('team-grid');
+
+            // Inject CSS animation for modal
+            if (!document.getElementById('modal-anim-style')) {
+                const s = document.createElement('style');
+                s.id = 'modal-anim-style';
+                s.textContent = '@keyframes modalFadeIn{from{opacity:0;transform:scale(0.95) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}';
+                document.head.appendChild(s);
+            }
+
+            // ── Get avatar color based on name ──
+            const COLORS = ['#1A56DB','#0D9488','#7C3AED','#DB2777','#D97706'];
+            function nameColor(name) {
+                let h = 0;
+                for (const c of name) h = (h * 31 + c.charCodeAt(0)) % COLORS.length;
+                return COLORS[h];
+            }
+
+            // ── Render a single member card ──
+            function buildCard(m) {
+                const initials = m.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+                const color = nameColor(m.name);
+                const card = document.createElement('div');
+                card.className = 'member-card';
+                card.dataset.memberId = m.id;
+                card.innerHTML = `
+                    <div class="member-avatar" style="background:${color};color:#fff;font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;">${initials}</div>
+                    <div>
+                        <div class="member-name">${m.name}</div>
+                        <div class="member-role-text">${m.job_role}${m.joined ? ' <span style="color:var(--text-muted);font-size:0.78rem;">· since ' + m.joined + '</span>' : ''}</div>
+                    </div>`;
+                return card;
+            }
+
+            // ── Load members from API ──
+            async function loadMembers() {
+                try {
+                    const res = await fetch('/api/team/');
+                    const data = await res.json();
+
+                    // Clear loading state
+                    grid.innerHTML = '';
+
+                    if (!data.members || data.members.length === 0) {
+                        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:3rem;">
+                            <i class="fa-solid fa-users" style="font-size:2.5rem;opacity:0.3;"></i>
+                            <p style="margin-top:0.75rem;">No team members yet. Add your first member!</p>
+                        </div>`;
+                        return;
+                    }
+
+                    data.members.forEach(m => grid.appendChild(buildCard(m)));
+                } catch (e) {
+                    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#ef4444;padding:2rem;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Failed to load team members.
+                    </div>`;
+                }
+            }
+
+            loadMembers();
+
+            function openModal() { modal.style.display = 'flex'; form.reset(); }
+            function closeModal() { modal.style.display = 'none'; }
+
+            addBtn.addEventListener('click', openModal);
+            closeBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.style.display === 'flex') closeModal(); });
+
+            // ── Submit new member ──
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const fd = new FormData(form);
+                const email = fd.get('member-email').trim();
+                const name  = fd.get('member-name').trim();
+                const job_role = fd.get('member-role');
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+
+                // Validate name
+                if (!name || name.length < 2) {
+                    showTeamToast('Name is required (at least 2 characters)', 'error');
+                    return;
+                }
+                if (!/[a-zA-Z]/.test(name)) {
+                    showTeamToast('Name must contain at least one letter', 'error');
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Adding…';
+
+                try {
+                    const res = await fetch('/api/team/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, name, job_role })
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        const emptyState = grid.querySelector('[style*="No team members"]');
+                        if (emptyState) grid.innerHTML = '';
+                        grid.appendChild(buildCard(data.member));
+                        closeModal();
+                        showTeamToast(`${data.member.name} added to your team!`, 'success');
+                    } else {
+                        showTeamToast(data.error || 'Could not add member', 'error');
+                    }
+                } catch (err) {
+                    showTeamToast('Network error', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-user-plus icon-margin-right"></i>Add Member';
+                }
+            });
+        });
+
+        function showTeamToast(msg, type) {
+            let t = document.getElementById('team-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'team-toast';
+                t.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:99999;padding:0.75rem 1.25rem;border-radius:10px;font-size:0.9rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.15);transition:opacity 0.4s;';
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            t.style.background = type === 'success' ? '#0D9488' : '#ef4444';
+            t.style.color = '#fff';
+            t.style.opacity = '1';
+            setTimeout(() => { t.style.opacity = '0'; }, 3500);
+        }
+    </script>
+
+
+
+    <script>
+        // Django-injected user data
+        window.__USER__ = {{ user_json|safe }};
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Policy - HumanLoop</title>
+    <meta name="description" content="HumanLoop Cookie Policy - Learn about the cookies we use.">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}"></script>
+    <style>
+        .legal-page { max-width: 860px; margin: 2rem auto; padding: 0 1.5rem 3rem; }
+        .legal-hero {
+            text-align: center; padding: 2.5rem 2rem;
+            background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(234,179,8,0.06));
+            border-radius: 16px; margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+        .legal-hero i { font-size: 2.5rem; color: #ea580c; margin-bottom: 0.75rem; display: block; }
+        .legal-hero h1 { font-size: 2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem; }
+        .legal-hero p { color: var(--text-muted); font-size: 0.9rem; }
+        .legal-card {
+            background: var(--bg-surface); border: 1px solid var(--border-color);
+            border-radius: 14px; padding: 2rem; margin-bottom: 1.25rem;
+            transition: box-shadow 0.2s;
+        }
+        .legal-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
+        .legal-card h2 {
+            font-size: 1.15rem; font-weight: 700; color: var(--text-primary);
+            margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .legal-card h2 i { color: #ea580c; font-size: 1rem; }
+        .legal-card p, .legal-card li {
+            font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7;
+        }
+        .legal-card ul { padding-left: 1.5rem; margin-top: 0.5rem; }
+        .legal-card li { margin-bottom: 0.4rem; }
+        .cookie-table {
+            width: 100%; border-collapse: collapse; margin-top: 0.75rem;
+            font-size: 0.85rem;
+        }
+        .cookie-table th {
+            background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(234,179,8,0.06));
+            padding: 0.75rem 1rem; text-align: left;
+            font-weight: 600; color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+        }
+        .cookie-table td {
+            padding: 0.6rem 1rem; border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        .cookie-table tr:last-child td { border-bottom: none; }
+        .cookie-badge {
+            display: inline-block; padding: 0.15rem 0.5rem; border-radius: 6px;
+            font-size: 0.72rem; font-weight: 600;
+        }
+        .badge-essential { background: rgba(13,148,136,0.1); color: #0D9488; }
+        .badge-optional { background: rgba(234,88,12,0.1); color: #ea580c; }
+        .legal-back {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            color: #1A56DB; font-weight: 600; font-size: 0.9rem;
+            text-decoration: none; margin-bottom: 1.5rem;
+            transition: gap 0.2s;
+        }
+        .legal-back:hover { gap: 0.6rem; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'dashboard' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 38V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="38" r="5" class="logo-dot-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System"><i class="fa-solid fa-display"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="legal-page">
+        <a href="{% url 'settings' %}" class="legal-back"><i class="fa-solid fa-arrow-left"></i> Back to Settings</a>
+
+        <div class="legal-hero">
+            <i class="fa-solid fa-cookie-bite"></i>
+            <h1>Cookie Policy</h1>
+            <p>Last updated: February 26, 2026</p>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-circle-info"></i> What Are Cookies?</h2>
+            <p>Cookies are small text files stored on your device when you visit a website. They help the website remember your preferences, keep you logged in, and improve your experience. HumanLoop uses a minimal number of cookies, primarily for essential functionality.</p>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-list-check"></i> Cookies We Use</h2>
+            <p>Below is a detailed list of cookies used by HumanLoop:</p>
+            <table class="cookie-table">
+                <thead>
+                    <tr>
+                        <th>Cookie Name</th>
+                        <th>Purpose</th>
+                        <th>Duration</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>sessionid</code></td>
+                        <td>Maintains your login session so you stay authenticated</td>
+                        <td>2 weeks</td>
+                        <td><span class="cookie-badge badge-essential">Essential</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>csrftoken</code></td>
+                        <td>Protects against Cross-Site Request Forgery attacks</td>
+                        <td>1 year</td>
+                        <td><span class="cookie-badge badge-essential">Essential</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>humanloop_theme</code></td>
+                        <td>Remembers your preferred theme (light/dark/system)</td>
+                        <td>1 year</td>
+                        <td><span class="cookie-badge badge-optional">Preference</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-shield-halved"></i> Essential Cookies</h2>
+            <p>Essential cookies are strictly necessary for the Platform to function. Without these cookies, you would not be able to log in or use the Platform securely. These cookies:</p>
+            <ul>
+                <li>Do not collect personal information for marketing purposes</li>
+                <li>Are automatically deleted when their expiry period ends</li>
+                <li>Cannot be disabled as they are required for basic functionality</li>
+                <li>Are first-party cookies (set by HumanLoop only)</li>
+            </ul>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-sliders"></i> Preference Cookies</h2>
+            <p>Preference cookies remember your settings and choices to provide a more personalized experience. These include your theme preference (light/dark mode). You can clear these cookies at any time through your browser settings without affecting platform functionality.</p>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-ban"></i> Third-Party Cookies</h2>
+            <p>HumanLoop does <strong>not</strong> use any third-party tracking cookies or advertising cookies. We do not share cookie data with advertisers or marketing networks. The only external resources loaded are Google Fonts for typography, which do not set cookies on your device.</p>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-gear"></i> Managing Cookies</h2>
+            <p>You can control cookies through your browser settings. Most browsers allow you to:</p>
+            <ul>
+                <li>View all cookies stored on your device</li>
+                <li>Delete individual or all cookies</li>
+                <li>Block cookies from specific or all websites</li>
+                <li>Set your browser to notify you when a cookie is set</li>
+            </ul>
+            <p style="margin-top:0.75rem;"><strong>Note:</strong> Blocking essential cookies will prevent you from logging into HumanLoop. We recommend keeping essential cookies enabled for the best experience.</p>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-rotate"></i> Policy Updates</h2>
+            <p>We may update this Cookie Policy from time to time. Changes will be posted on this page with an updated revision date. We encourage you to review this page periodically for the latest information on our cookie practices.</p>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-envelope"></i> Contact Us</h2>
+            <p>If you have questions about our use of cookies, please contact us at:</p>
+            <p style="margin-top:0.5rem;"><strong>Email:</strong> privacy@humanloop.org<br>
+            <strong>Address:</strong> HumanLoop Social Innovation Platform, India</p>
+        </div>
+    </div>
+</body>
+</html>

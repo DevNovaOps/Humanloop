@@ -1,0 +1,262 @@
+/* ═══════════════════════════════════════════
+   ABOUT PAGE — HumanLoop Theme
+   ═══════════════════════════════════════════ */
+
+/* ─── Page Hero ─── */
+.page-hero {
+    padding: 6rem 0 3rem;
+    text-align: center;
+    background: linear-gradient(135deg, var(--hl-blue-light) 0%, var(--hl-teal-light) 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .page-hero,
+[data-theme="system"] .page-hero {
+    background: linear-gradient(135deg, rgba(26, 86, 219, 0.12) 0%, rgba(13, 148, 136, 0.10) 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+    [data-theme="system"] .page-hero {
+        background: linear-gradient(135deg, rgba(26, 86, 219, 0.12) 0%, rgba(13, 148, 136, 0.10) 100%);
+    }
+}
+
+.page-hero h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, var(--hl-blue), var(--hl-teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-hero p {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ─── Page Content ─── */
+.page-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+}
+
+/* ─── About Sections ─── */
+.about-mission {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+}
+
+.about-mission .card {
+    padding: 2rem;
+}
+
+.about-mission .card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.about-mission .card p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.about-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--hl-blue), var(--hl-teal));
+    color: white;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.about-values {
+    margin-top: 3rem;
+}
+
+.about-values h2 {
+    text-align: center;
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    color: var(--text-primary);
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.value-card {
+    text-align: center;
+    padding: 2rem 1.5rem;
+}
+
+.value-card i {
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--hl-blue), var(--hl-teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.value-card h4 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.value-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* ─── Footer ─── */
+.footer-brand {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.footer-description {
+    font-size: 0.9rem;
+}
+
+.footer-heading {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.footer-list {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.footer-item {
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.footer-item:hover {
+    color: var(--hl-blue);
+}
+
+.footer-item a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.footer-item a:hover {
+    color: var(--hl-blue);
+}
+
+.footer-copyright {
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+.footer-grid {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.footer-grid>div:first-child {
+    max-width: 300px;
+}
+
+/* ─── Responsive — Tablet ─── */
+@media (max-width: 1024px) {
+    .page-hero {
+        padding: 5rem 0 2.5rem;
+    }
+
+    .about-mission {
+        gap: 1.5rem;
+    }
+
+    .values-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ─── Responsive — Mobile ─── */
+@media (max-width: 768px) {
+    .page-hero {
+        padding: 4rem 0 2rem;
+    }
+
+    .about-mission {
+        grid-template-columns: 1fr;
+    }
+
+    .values-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .page-hero h1 {
+        font-size: 1.75rem;
+    }
+
+    .page-hero p {
+        font-size: 1rem;
+    }
+
+    .page-content {
+        padding: 2rem 1rem 3rem;
+    }
+
+    .footer-grid {
+        flex-direction: column !important;
+        gap: 2rem !important;
+    }
+
+    .footer-grid>div {
+        max-width: 100% !important;
+    }
+}
+
+/* ─── Responsive — Small Mobile ─── */
+@media (max-width: 480px) {
+    .page-hero {
+        padding: 3.5rem 0 1.5rem;
+    }
+
+    .page-hero h1 {
+        font-size: 1.5rem;
+    }
+
+    .page-content {
+        padding: 1.5rem 0.75rem 2.5rem;
+    }
+
+    .about-mission .card {
+        padding: 1.25rem;
+    }
+
+    .value-card {
+        padding: 1.5rem 1rem;
+    }
+}

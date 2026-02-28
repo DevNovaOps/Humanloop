@@ -1,0 +1,30 @@
+/* ═══════════════════════════════════════════
+   ADMIN DASHBOARD — Extra Styles
+   ═══════════════════════════════════════════ */
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.btn-outline:hover {
+    border-color: var(--hl-blue);
+    color: var(--hl-blue);
+    background: rgba(26, 86, 219, 0.04);
+}
+
+@media (max-width: 768px) {
+    .dashboard-metrics-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-metrics-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'login.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}"></script>
+    <style>
+        /* OTP Input Row */
+        .otp-input-row {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: center;
+            margin-bottom: 0.25rem;
+        }
+
+        .otp-input-row input {
+            width: 48px;
+            height: 54px;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            transition: all 0.25s ease;
+            outline: none;
+            caret-color: var(--hl-blue);
+        }
+
+        .otp-input-row input:focus {
+            border-color: var(--hl-blue);
+            box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.12);
+        }
+
+        .otp-input-row input.filled {
+            border-color: var(--hl-blue);
+            background: linear-gradient(135deg, rgba(26, 86, 219, 0.06), rgba(13, 148, 136, 0.04));
+        }
+
+        /* Password field wrapper */
+        .password-field-wrap {
+            position: relative;
+        }
+
+        .password-field-wrap .input-field {
+            padding-right: 2.8rem;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.95rem;
+            padding: 0.25rem;
+            transition: color 0.2s;
+        }
+
+        .password-toggle-btn:hover {
+            color: var(--hl-blue);
+        }
+
+        /* Resend link */
+        .resend-row {
+            text-align: center;
+            margin-top: 0.75rem;
+        }
+
+        .resend-link {
+            font-size: 0.85rem;
+            color: var(--hl-blue);
+            font-weight: 500;
+            cursor: pointer;
+            background: none;
+            border: none;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .resend-link:hover {
+            color: var(--hl-teal);
+        }
+
+        .resend-link:disabled {
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        /* Step sections */
+        .step-section {
+            display: none;
+        }
+
+        .step-section.active {
+            display: block;
+            animation: stepFadeIn 0.4s ease forwards;
+        }
+
+        @keyframes stepFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Choice buttons after OTP verified */
+        .choice-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-choice {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-surface);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: left;
+        }
+
+        .btn-choice:hover {
+            border-color: var(--hl-blue);
+            background: rgba(26, 86, 219, 0.04);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-choice .choice-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .btn-choice .choice-icon.icon-reset {
+            background: linear-gradient(135deg, rgba(26, 86, 219, 0.12), rgba(13, 148, 136, 0.08));
+            color: var(--hl-blue);
+        }
+
+        .btn-choice .choice-icon.icon-skip {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(13, 148, 136, 0.08));
+            color: #10B981;
+        }
+
+        .choice-text strong {
+            display: block;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 0.15rem;
+        }
+
+        .choice-text span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Password mismatch error */
+        .password-error {
+            font-size: 0.78rem;
+            color: #ef4444;
+            margin-top: 0.35rem;
+            display: none;
+        }
+
+        .password-error.visible {
+            display: block;
+        }
+
+        /* Success state */
+        .otp-success-msg {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .otp-success-msg.visible {
+            display: flex;
+            animation: successFadeIn 0.6s ease forwards;
+        }
+
+        .otp-success-msg h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #10B981;
+            margin-bottom: 0.35rem;
+        }
+
+        .otp-success-msg p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'index' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+
+            <div class="nav-links"></div>
+
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="auth-container">
+        <div class="auth-card card" id="otpCard">
+            <div class="auth-header">
+                <div class="auth-icon-wrapper" id="otpIcon">
+                    <i class="fa-solid fa-shield-halved" id="otpIconSymbol"></i>
+                </div>
+                <h2 id="otpTitle">Verify OTP</h2>
+                <p id="otpSubtitle">Enter the OTP sent to your email</p>
+            </div>
+
+            <!-- ══════ STEP 1: Enter OTP ══════ -->
+            <div class="step-section active" id="step1">
+                <form id="otpVerifyForm">
+                    <div class="form-group">
+                        <label>Enter OTP</label>
+                        <div class="otp-input-row" id="otpRow">
+                            <input type="text" maxlength="1" class="otp-box" data-index="0" inputmode="numeric"
+                                autofocus>
+                            <input type="text" maxlength="1" class="otp-box" data-index="1" inputmode="numeric">
+                            <input type="text" maxlength="1" class="otp-box" data-index="2" inputmode="numeric">
+                            <input type="text" maxlength="1" class="otp-box" data-index="3" inputmode="numeric">
+                            <input type="text" maxlength="1" class="otp-box" data-index="4" inputmode="numeric">
+                            <input type="text" maxlength="1" class="otp-box" data-index="5" inputmode="numeric">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block" id="verifyOtpBtn">
+                        <i class="fa-solid fa-check icon-margin-right"></i>Verify OTP
+                    </button>
+                </form>
+
+                <div class="resend-row">
+                    <button class="resend-link" id="resendBtn" onclick="resendOtp()">Resend OTP</button>
+                </div>
+            </div>
+
+            <!-- ══════ STEP 2: Choose action ══════ -->
+            <div class="step-section" id="step2">
+                <div class="choice-buttons">
+                    <button class="btn-choice" onclick="showResetForm()">
+                        <div class="choice-icon icon-reset"><i class="fa-solid fa-key"></i></div>
+                        <div class="choice-text">
+                            <strong>Set New Password</strong>
+                            <span>Create a new password for your account</span>
+                        </div>
+                    </button>
+                    <button class="btn-choice" onclick="continueWithout()">
+                        <div class="choice-icon icon-skip"><i class="fa-solid fa-arrow-right-to-bracket"></i></div>
+                        <div class="choice-text">
+                            <strong>Continue Without Changing</strong>
+                            <span>Go back to sign in with your current password</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ══════ STEP 3: Reset Password ══════ -->
+            <div class="step-section" id="step3">
+                <form id="resetForm">
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <div class="password-field-wrap">
+                            <input type="password" id="newPassword" class="input-field" placeholder="Enter new password"
+                                required>
+                            <button type="button" class="password-toggle-btn" onclick="togglePwd('newPassword', this)">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-requirements" id="passwordRequirements">
+                            <div class="req-item" id="reqLength">
+                                <span class="req-dot"></span>
+                                <span>At least 8 characters</span>
+                            </div>
+                            <div class="req-item" id="reqCapital">
+                                <span class="req-dot"></span>
+                                <span>One uppercase letter</span>
+                            </div>
+                            <div class="req-item" id="reqNumber">
+                                <span class="req-dot"></span>
+                                <span>One number</span>
+                            </div>
+                            <div class="req-item" id="reqSymbol">
+                                <span class="req-dot"></span>
+                                <span>One special symbol (!@#$...)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <div class="password-field-wrap">
+                            <input type="password" id="confirmPassword" class="input-field"
+                                placeholder="Confirm new password" required>
+                            <button type="button" class="password-toggle-btn"
+                                onclick="togglePwd('confirmPassword', this)">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-error" id="mismatchError">Passwords do not match</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block" id="resetBtn">
+                        <i class="fa-solid fa-check-circle icon-margin-right"></i>Reset Password
+                    </button>
+                </form>
+            </div>
+
+            <div class="auth-footer">
+                <p class="auth-secure-text">Protected by HumanLoop SecureAuth&trade;</p>
+            </div>
+
+            <!-- Success message (hidden initially) -->
+            <div class="otp-success-msg" id="successMsg">
+                <div class="success-checkmark-ring">
+                    <svg viewBox="0 0 52 52">
+                        <circle class="success-circle" cx="26" cy="26" r="24" fill="none" stroke="#10B981"
+                            stroke-width="3" />
+                        <path class="success-check" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round"
+                            stroke-linejoin="round" d="M15 27 l7 7 15-15" />
+                    </svg>
+                </div>
+                <h3 id="successTitle">Password Reset Successful</h3>
+                <p>Redirecting to sign in...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ── Step navigation ── */
+        function goToStep(step) {
+            document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+        }
+
+        /* ── OTP auto-advance ── */
+        const otpBoxes = document.querySelectorAll('.otp-box');
+        otpBoxes.forEach((box, i) => {
+            box.addEventListener('input', () => {
+                box.value = box.value.replace(/\D/g, '');
+                if (box.value && i < otpBoxes.length - 1) otpBoxes[i + 1].focus();
+                box.classList.toggle('filled', box.value !== '');
+            });
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !box.value && i > 0) {
+                    otpBoxes[i - 1].focus();
+                    otpBoxes[i - 1].value = '';
+                    otpBoxes[i - 1].classList.remove('filled');
+                }
+            });
+            box.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const data = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                data.split('').forEach((ch, j) => {
+                    if (otpBoxes[i + j]) {
+                        otpBoxes[i + j].value = ch;
+                        otpBoxes[i + j].classList.add('filled');
+                    }
+                });
+                if (otpBoxes[Math.min(i + data.length, otpBoxes.length - 1)])
+                    otpBoxes[Math.min(i + data.length, otpBoxes.length - 1)].focus();
+            });
+        });
+
+        /* ── STEP 1: Verify OTP ── */
+        document.getElementById('otpVerifyForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const otp = Array.from(otpBoxes).map(b => b.value).join('');
+            if (otp.length < 6) {
+                otpBoxes.forEach(b => { if (!b.value) b.style.borderColor = '#ef4444'; });
+                setTimeout(() => otpBoxes.forEach(b => b.style.borderColor = ''), 1500);
+                return;
+            }
+
+            const btn = document.getElementById('verifyOtpBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+
+            // Show or create error element
+            let errorEl = document.getElementById('otp-error');
+            if (!errorEl) {
+                errorEl = document.createElement('div');
+                errorEl.id = 'otp-error';
+                errorEl.style.cssText = 'color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:0.75rem 1rem;font-size:0.875rem;margin-bottom:1rem;display:none;';
+                document.getElementById('otpVerifyForm').prepend(errorEl);
+            }
+            errorEl.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/verify-otp/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ otp })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    // Store redirect URL for "Continue Without Changing"
+                    window.__dashboardRedirect = data.redirect || '/dashboard/';
+                    document.getElementById('otpIcon').classList.add('lock-success');
+                    document.getElementById('otpIconSymbol').className = 'fa-solid fa-circle-check';
+                    document.getElementById('otpTitle').textContent = 'OTP Verified!';
+                    document.getElementById('otpSubtitle').textContent = 'What would you like to do next?';
+                    goToStep(2);
+                } else {
+                    errorEl.textContent = data.error || 'Invalid OTP. Please try again.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-check icon-margin-right"></i>Verify OTP';
+                    // Clear OTP boxes
+                    otpBoxes.forEach(b => { b.value = ''; b.classList.remove('filled'); });
+                    otpBoxes[0].focus();
+                }
+            } catch (err) {
+                errorEl.textContent = 'Network error. Please try again.';
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check icon-margin-right"></i>Verify OTP';
+            }
+        });
+
+        /* ── STEP 2: Choice actions ── */
+        function showResetForm() {
+            document.getElementById('otpTitle').textContent = 'Reset Password';
+            document.getElementById('otpSubtitle').textContent = 'Create a strong new password for your account.';
+            document.getElementById('otpIconSymbol').className = 'fa-solid fa-key';
+            document.getElementById('otpIcon').classList.remove('lock-success');
+            goToStep(3);
+        }
+
+        function continueWithout() {
+            const card = document.getElementById('otpCard');
+            const otpIcon = document.getElementById('otpIcon');
+            const otpTitle = document.getElementById('otpTitle');
+            const otpSubtitle = document.getElementById('otpSubtitle');
+            const successMsg = document.getElementById('successMsg');
+
+            document.getElementById('successTitle').textContent = 'Signing you in...';
+            document.querySelector('#successMsg p').textContent = 'Redirecting to your dashboard...';
+
+            // Hide current step
+            document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+            document.querySelector('.auth-footer').style.display = 'none';
+            otpTitle.classList.add('login-text-exit');
+            otpSubtitle.classList.add('login-text-exit');
+            otpIcon.classList.add('lock-bounce');
+
+            setTimeout(() => { successMsg.classList.add('visible'); }, 400);
+            setTimeout(() => {
+                card.classList.add('card-success-glow');
+                // User is already auto-logged in from OTP verify — go to dashboard
+                const redirectUrl = window.__dashboardRedirect || '/dashboard/';
+                setTimeout(() => { window.location.href = redirectUrl; }, 800);
+            }, 1400);
+        }
+
+        /* ── STEP 3: Reset form ── */
+        function togglePwd(fieldId, btn) {
+            const field = document.getElementById(fieldId);
+            const icon = btn.querySelector('i');
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        const newPwd = document.getElementById('newPassword');
+        const checks = {
+            reqLength: v => v.length >= 8,
+            reqCapital: v => /[A-Z]/.test(v),
+            reqNumber: v => /[0-9]/.test(v),
+            reqSymbol: v => /[^A-Za-z0-9]/.test(v)
+        };
+
+        newPwd.addEventListener('input', () => {
+            const val = newPwd.value;
+            for (const [id, test] of Object.entries(checks)) {
+                document.getElementById(id).classList.toggle('met', test(val));
+            }
+        });
+
+        document.getElementById('resetForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const val = newPwd.value;
+
+            if (!Object.values(checks).every(test => test(val))) {
+                document.getElementById('passwordRequirements').classList.add('shake');
+                setTimeout(() => document.getElementById('passwordRequirements').classList.remove('shake'), 600);
+                return;
+            }
+
+            const confirmPwd = document.getElementById('confirmPassword');
+            if (newPwd.value !== confirmPwd.value) {
+                document.getElementById('mismatchError').classList.add('visible');
+                setTimeout(() => document.getElementById('mismatchError').classList.remove('visible'), 3000);
+                return;
+            }
+
+            const btn = document.getElementById('resetBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Resetting...';
+
+            // Show or create error element
+            let errorEl = document.getElementById('reset-error');
+            if (!errorEl) {
+                errorEl = document.createElement('div');
+                errorEl.id = 'reset-error';
+                errorEl.style.cssText = 'color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:0.75rem 1rem;font-size:0.875rem;margin-bottom:1rem;display:none;';
+                document.getElementById('resetForm').prepend(errorEl);
+            }
+            errorEl.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/reset-password/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ new_password: val })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showSuccess('Password Reset Successful', data.redirect || '/dashboard/');
+                } else {
+                    errorEl.textContent = data.error || 'Failed to reset password.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-check-circle icon-margin-right"></i>Reset Password';
+                }
+            } catch (err) {
+                errorEl.textContent = 'Network error. Please try again.';
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check-circle icon-margin-right"></i>Reset Password';
+            }
+        });
+
+        /* ── Shared success animation ── */
+        function showSuccess(title, redirectUrl) {
+            const card = document.getElementById('otpCard');
+            const otpIcon = document.getElementById('otpIcon');
+            const otpIconSymbol = document.getElementById('otpIconSymbol');
+            const otpTitle = document.getElementById('otpTitle');
+            const otpSubtitle = document.getElementById('otpSubtitle');
+            const successMsg = document.getElementById('successMsg');
+
+            document.getElementById('successTitle').textContent = title;
+            document.querySelector('#successMsg p').textContent = 'Redirecting to your dashboard...';
+
+            otpIcon.classList.add('lock-success');
+            otpIconSymbol.className = 'fa-solid fa-circle-check';
+            otpIcon.classList.add('lock-bounce');
+
+            // Hide current step
+            document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+            document.querySelector('.auth-footer').style.display = 'none';
+            otpTitle.classList.add('login-text-exit');
+            otpSubtitle.classList.add('login-text-exit');
+
+            setTimeout(() => { successMsg.classList.add('visible'); }, 400);
+            setTimeout(() => {
+                card.classList.add('card-success-glow');
+                setTimeout(() => { window.location.href = redirectUrl || '/dashboard/'; }, 800);
+            }, 1400);
+        }
+
+        /* ── Resend OTP ── */
+        async function resendOtp() {
+            const btn = document.getElementById('resendBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            const email = sessionStorage.getItem('resetEmail');
+            if (!email) {
+                btn.textContent = 'No email found — go back';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/send-otp/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    btn.textContent = 'OTP Sent!';
+                } else {
+                    btn.textContent = data.error || 'Failed to resend';
+                }
+            } catch (err) {
+                btn.textContent = 'Network error';
+            }
+
+            // Cooldown timer
+            let sec = 30;
+            const timer = setInterval(() => {
+                sec--;
+                btn.textContent = `Resend in ${sec}s`;
+                if (sec <= 0) {
+                    clearInterval(timer);
+                    btn.disabled = false;
+                    btn.textContent = 'Resend OTP';
+                }
+            }, 1000);
+        }
+    </script>
+
+
+    <script>
+        // Django-injected user data
+        window.__USER__ = {{ user_json|safe }};
+    </script>
+</body>
+
+</html>

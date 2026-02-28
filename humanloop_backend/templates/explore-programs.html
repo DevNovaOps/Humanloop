@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="{{ current_language|default:'en' }}" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ translations.explore_programs|default:"Explore Programs" }} - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        window.__USER__ = {{ user_json|safe }};
+        window.__TRANSLATIONS__ = {{ translations_json|safe }};
+        window.__LANG__ = "{{ current_language|default:'en' }}";
+    </script>
+    <script defer src="{% static 'script.js' %}"></script>
+</head>
+
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'dashboard_beneficiary' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="nav-links"></div>
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i class="fa-solid fa-desktop"></i></button>
+                </div>
+                <div class="nav-user-profile">
+                    <span class="text-medium-sm">{{ user.name|default:"Beneficiary" }}</span>
+                    <div class="avatar-sm"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-section-title">{{ translations.my_space|default:"My Space" }}</div>
+            <nav class="sidebar-nav">
+                <!-- Dynamic sidebar rendered by script.js -->
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="dashboard-page-header">
+                <div>
+                    <h1><i class="fa-solid fa-compass" style="color:#3B82F6;margin-right:0.5rem;"></i>{{ translations.explore_programs|default:"Explore Programs" }}</h1>
+                    <p>{{ translations.explore_programs_desc|default:"Browse and enroll in available programs near you." }}</p>
+                </div>
+            </div>
+
+            <!-- Available Programs Grid -->
+            <div id="programs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.25rem;margin-top:1rem;">
+                {% if available_programs %}
+                    {% for pilot in available_programs %}
+                    <div class="card program-card" style="padding:0;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;" onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 30px rgba(0,0,0,0.12)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+                        <!-- Color header bar -->
+                        <div style="height:6px;background:linear-gradient(90deg,#3B82F6,#0D9488);"></div>
+                        <div style="padding:1.25rem 1.5rem;">
+                            <!-- Status badge -->
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">
+                                <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;padding:0.25rem 0.6rem;border-radius:50px;background:rgba(13,148,136,0.12);color:#0D9488;">{{ pilot.status|upper }}</span>
+                                <span style="font-size:0.75rem;color:var(--text-muted);"><i class="fa-solid fa-calendar" style="margin-right:0.3rem;"></i>{{ pilot.target_date|date:"M d, Y" }}</span>
+                            </div>
+
+                            <!-- Title -->
+                            <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;line-height:1.3;">{{ pilot.title }}</h3>
+
+                            <!-- Meta pills -->
+                            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;">
+                                <span style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;color:var(--text-muted);background:var(--bg-secondary);padding:0.3rem 0.6rem;border-radius:6px;">
+                                    <i class="fa-solid fa-location-dot" style="color:#ef4444;font-size:0.7rem;"></i>{{ pilot.location }}
+                                </span>
+                                <span style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;color:var(--text-muted);background:var(--bg-secondary);padding:0.3rem 0.6rem;border-radius:6px;">
+                                    <i class="fa-solid fa-users" style="color:#3B82F6;font-size:0.7rem;"></i>{{ pilot.target_beneficiaries }} {{ translations.beneficiaries|default:"Beneficiaries" }}
+                                </span>
+                                <span style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;color:var(--text-muted);background:var(--bg-secondary);padding:0.3rem 0.6rem;border-radius:6px;">
+                                    <i class="fa-solid fa-tag" style="color:#8B5CF6;font-size:0.7rem;"></i>{{ pilot.activity_type }}
+                                </span>
+                            </div>
+
+                            <!-- Enroll button -->
+                            {% if pilot.id in enrolled_ids %}
+                            <button class="btn btn-secondary" style="width:100%;justify-content:center;opacity:0.7;cursor:default;" disabled>
+                                <i class="fa-solid fa-check-circle" style="margin-right:0.4rem;color:#0D9488;"></i>{{ translations.enrolled|default:"Enrolled" }}
+                            </button>
+                            {% else %}
+                            <button class="btn btn-primary enroll-btn" style="width:100%;justify-content:center;" data-pilot-id="{{ pilot.id }}" onclick="enrollInProgram(this, {{ pilot.id }})">
+                                <i class="fa-solid fa-plus-circle" style="margin-right:0.4rem;"></i>{{ translations.enroll_now|default:"Enroll Now" }}
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="card" style="grid-column:1/-1;padding:3rem;text-align:center;">
+                        <i class="fa-solid fa-folder-open" style="font-size:3rem;opacity:0.2;display:block;margin-bottom:1rem;"></i>
+                        <p style="color:var(--text-muted);font-size:0.95rem;">{{ translations.no_available_programs|default:"No programs available for enrollment at this time." }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Translations already injected in <head>
+        const T = window.__TRANSLATIONS__ || {};
+
+        async function enrollInProgram(btn, pilotId) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:0.4rem;"></i>' + (T.enroll_now || 'Enrolling...');
+
+            try {
+                const res = await fetch('/api/enroll/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pilot_id: pilotId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    btn.outerHTML = `<button class="btn btn-secondary" style="width:100%;justify-content:center;opacity:0.7;cursor:default;" disabled>
+                        <i class="fa-solid fa-check-circle" style="margin-right:0.4rem;color:#0D9488;"></i>${T.enrolled || 'Enrolled'}
+                    </button>`;
+                    showToast(T.enroll_success || 'You have been successfully enrolled!', 'success');
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-plus-circle" style="margin-right:0.4rem;"></i>${T.enroll_now || 'Enroll Now'}`;
+                    showToast(data.error || 'Enrollment failed', 'error');
+                }
+            } catch (e) {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-plus-circle" style="margin-right:0.4rem;"></i>${T.enroll_now || 'Enroll Now'}`;
+                showToast(T.network_error || 'Network error', 'error');
+            }
+        }
+
+        function showToast(msg, type) {
+            let t = document.getElementById('explore-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'explore-toast';
+                t.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:99999;padding:0.75rem 1.25rem;border-radius:10px;font-size:0.9rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.15);transition:all 0.3s;';
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            t.style.background = type === 'success' ? '#0D9488' : '#ef4444';
+            t.style.color = '#fff';
+            t.style.opacity = '1';
+            setTimeout(() => { t.style.opacity = '0'; }, 3500);
+        }
+    </script>
+</body>
+
+</html>

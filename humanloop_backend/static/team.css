@@ -1,0 +1,98 @@
+/* ═══════════════════════════════════════════
+   TEAM PAGE — HumanLoop Theme
+   ═══════════════════════════════════════════ */
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.member-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: var(--transition), var(--theme-transition);
+    background: var(--bg-surface);
+}
+
+.member-card:hover {
+    border-color: var(--hl-blue);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.member-avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, rgba(26, 86, 219, 0.1), rgba(13, 148, 136, 0.1));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--hl-blue);
+    flex-shrink: 0;
+}
+
+.member-avatar-admin {
+    background: linear-gradient(135deg, rgba(26, 86, 219, 0.15), rgba(13, 148, 136, 0.15));
+    color: var(--hl-blue);
+}
+
+.member-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.member-role-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+}
+
+.role-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    background: rgba(26, 86, 219, 0.08);
+    border-radius: 4px;
+    color: var(--hl-blue);
+    font-weight: 600;
+}
+
+.team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .team-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .member-card {
+        padding: 1.25rem;
+    }
+
+    .member-name {
+        font-size: 1rem;
+    }
+
+    .member-role-text {
+        font-size: 0.85rem;
+    }
+}

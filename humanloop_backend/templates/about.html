@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'about.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}"></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'index' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+
+            <div class="nav-links">
+                <a href="{% url 'index' %}">Home</a>
+                <a href="{% url 'about' %}" class="active">About</a>
+                <a href="{% url 'partners' %}">Partners</a>
+                <a href="{% url 'contact' %}">Contact</a>
+            </div>
+
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light Mode"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark Mode"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <a href="{% url 'login' %}" class="btn btn-secondary">Log in</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <h1>About HumanLoop</h1>
+            <p>We empower communities to plan, pilot, and prove social impact through data-driven tools.</p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <div class="page-content">
+
+        <!-- Mission & Vision -->
+        <div class="about-mission">
+            <div class="card">
+                <div class="about-icon"><i class="fa-solid fa-bullseye"></i></div>
+                <h3>Our Mission</h3>
+                <p>HumanLoop bridges the gap between grassroots civic action and measurable outcomes. We provide NSS
+                    units, NGOs, and community organizations with intelligent tools to plan initiatives, manage budgets,
+                    coordinate team members, and track real-world impact — all in one unified platform.</p>
+            </div>
+            <div class="card">
+                <div class="about-icon"><i class="fa-solid fa-eye"></i></div>
+                <h3>Our Vision</h3>
+                <p>A world where every community organization — no matter how small — has access to the same caliber of
+                    planning, analytics, and feedback tools as large institutions. We believe data-driven social impact
+                    should be accessible to everyone, everywhere.</p>
+            </div>
+        </div>
+
+        <!-- What We Do -->
+        <div class="about-mission">
+            <div class="card">
+                <div class="about-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <h3>Smart Planning</h3>
+                <p>Design pilot initiatives with AI-powered suggestions for location, budget, and member allocation.
+                    Our planner helps you set realistic goals and timelines for maximum community impact.</p>
+            </div>
+            <div class="card">
+                <div class="about-icon"><i class="fa-solid fa-chart-line"></i></div>
+                <h3>Impact Analytics</h3>
+                <p>Track every metric that matters — from beneficiaries reached to budget utilization. Our dashboard
+                    transforms raw data into actionable insights that help you improve with every initiative.</p>
+            </div>
+        </div>
+
+        <!-- Values -->
+        <div class="about-values">
+            <h2>Our Core Values</h2>
+            <div class="values-grid">
+                <div class="card value-card">
+                    <i class="fa-solid fa-people-group"></i>
+                    <h4>Community First</h4>
+                    <p>Every feature we build starts with the people it serves. We listen to field workers, members,
+                        and beneficiaries to shape our tools.</p>
+                </div>
+                <div class="card value-card">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <h4>Transparency</h4>
+                    <p>Open budgets, clear metrics, and honest reporting. We believe accountability builds trust in
+                        civic organizations.</p>
+                </div>
+                <div class="card value-card">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <h4>Innovation</h4>
+                    <p>From AI-driven suggestions to predictive analytics, we continuously push the boundaries of what
+                        community tools can achieve.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="brand" style="font-size:0; margin-bottom: 1rem;">
+                        <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            style="height: 28px; width: 28px;">
+                            <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45"
+                                class="logo-stroke-blue" stroke-width="10" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                            <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                                stroke-linecap="round" />
+                            <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                        </svg>
+                        <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+                    </div>
+                    <p class="footer-description">Empowering communities to plan, pilot, and prove social impact through
+                        data-driven tools.</p>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Product</h4>
+                    <ul class="footer-list">
+                        <li class="footer-item"><a href="{% url 'planner' %}">Planning Tool</a></li>
+                        <li class="footer-item"><a href="{% url 'dashboard' %}">Impact Analytics</a></li>
+
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Company</h4>
+                    <ul class="footer-list">
+                        <li class="footer-item"><a href="{% url 'about' %}">About Us</a></li>
+                        <li class="footer-item"><a href="{% url 'partners' %}">Partner NGOs</a></li>
+                        <li class="footer-item"><a href="{% url 'contact' %}">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                &copy; 2024 HumanLoop Inc. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+
+    <script>
+        // Django-injected user data
+        window.__USER__ = {{ user_json|safe }};
+    </script>
+</body>
+
+</html>

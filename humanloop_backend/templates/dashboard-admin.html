@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard-admin.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}"></script>
+    <style>
+        .request-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; transition: all 0.3s; }
+        .request-card:hover { border-color: var(--primary); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .request-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+        .request-title { font-weight: 700; font-size: 0.95rem; color: var(--text-primary); }
+        .request-meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+        .request-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .btn-approve { background: #0D9488; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-approve:hover { background: #0B7C72; }
+        .btn-reject { background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-reject:hover { background: #ef4444; color: #fff; }
+        .badge-pending { background: #fef3c7; color: #92400e; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
+        .badge-count { background: #ef4444; color: #fff; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.7rem; font-weight: 700; margin-left: 0.3rem; }
+        .notes-input { width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.8rem; margin-top: 0.5rem; background: var(--bg-primary); color: var(--text-primary); }
+    </style>
+</head>
+
+<body class="dashboard-body">
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'dashboard_admin' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="nav-links"></div>
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <div class="nav-user-profile">
+                    <span class="text-medium-sm">{{ user.name|default:"Admin" }}</span>
+                    <div class="avatar-sm"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-section-title">Admin Panel</div>
+            <nav class="sidebar-nav">
+                <!-- Dynamic sidebar rendered by script.js -->
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="dashboard-page-header">
+                <div>
+                    <h1><i class="fa-solid fa-shield-halved" style="color:#7c3aed;margin-right:0.5rem;"></i>System
+                        Administration</h1>
+                    <p>Platform oversight, user management, and compliance controls.</p>
+                </div>
+                <button class="btn btn-primary" id="export-audit" onclick="exportAuditLog()"><i
+                        class="fa-solid fa-download icon-margin-right"></i>Export Audit Log</button>
+            </div>
+
+            <!-- Admin Stats -->
+            <div class="feature-grid dashboard-metrics-grid" style="grid-template-columns:repeat(4,1fr);">
+                <div class="card metric-card">
+                    <div class="metric-label">Total Users</div>
+                    <div class="metric-value-lg">{{ total_users|default:"0" }}</div>
+                    <div class="metric-subtext">Across all roles</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Total Pilots</div>
+                    <div class="metric-value-lg">{{ total_pilots|default:"0" }}</div>
+                    <div class="metric-subtext">Active & completed</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Pending Requests</div>
+                    <div class="metric-value-lg" style="color:#ef4444;">{{ pending_count|default:"0" }}</div>
+                    <div class="metric-subtext">Awaiting your review</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Active Accounts</div>
+                    <div class="metric-value-lg">{{ active_users|default:"0" }}</div>
+                    <div class="metric-subtext">{{ total_ngos|default:"0" }} NGOs registered</div>
+                </div>
+            </div>
+
+            <!-- Pending Assignment Requests -->
+            <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
+                <h3 style="margin-bottom:1rem;">
+                    <i class="fa-solid fa-clipboard-check" style="margin-right:0.5rem;color:#7c3aed;"></i>
+                    Assignment Requests
+                    {% if pending_count %}<span class="badge-count">{{ pending_count }}</span>{% endif %}
+                </h3>
+
+                {% if pending_assignments %}
+                {% for assignment in pending_assignments %}
+                <div class="request-card" id="request-{{ assignment.id }}">
+                    <div class="request-header">
+                        <div>
+                            <div class="request-title">{{ assignment.pilot.title }}</div>
+                            <div class="request-meta">
+                                <i class="fa-solid fa-user" style="margin-right:0.2rem;"></i>
+                                <strong>{{ assignment.requested_by.name }}</strong> → 
+                                <strong>{{ assignment.requested_ngo.name }}</strong>
+                                <span style="margin-left:0.4rem;color:#0D9488;font-weight:600;">✓ NGO Accepted</span>
+                            </div>
+                            <div class="request-meta">
+                                📍 {{ assignment.pilot.location }} · 💰 ₹{{ assignment.pilot.budget }} · 📅 {{ assignment.pilot.target_date }}
+                            </div>
+                        </div>
+                        <span class="badge-pending">Awaiting Verification</span>
+                    </div>
+                    <input type="text" class="notes-input" id="notes-{{ assignment.id }}" placeholder="Add review notes (optional)...">
+                    <div class="request-actions">
+                        <button class="btn-approve" onclick="handleAssignment({{ assignment.id }}, 'approve')">
+                            <i class="fa-solid fa-check" style="margin-right:0.3rem;"></i> Approve
+                        </button>
+                        <button class="btn-reject" onclick="handleAssignment({{ assignment.id }}, 'reject')">
+                            <i class="fa-solid fa-xmark" style="margin-right:0.3rem;"></i> Reject
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div style="text-align:center;padding:2rem;color:var(--text-muted);">
+                    <i class="fa-solid fa-check-circle" style="font-size:2rem;color:#0D9488;margin-bottom:0.5rem;display:block;"></i>
+                    No pending assignment requests. All caught up! 🎉
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- User Management Table -->
+            <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
+                <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-users-gear"
+                        style="margin-right:0.5rem;color:#7c3aed;"></i>User Management</h3>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;">
+                        <thead>
+                            <tr style="text-align:left;">
+                                <th style="padding:0.75rem;border-bottom:2px solid var(--border-color);font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">User</th>
+                                <th style="padding:0.75rem;border-bottom:2px solid var(--border-color);font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Role</th>
+                                <th style="padding:0.75rem;border-bottom:2px solid var(--border-color);font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Status</th>
+                                <th style="padding:0.75rem;border-bottom:2px solid var(--border-color);font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Joined</th>
+                                <th style="padding:0.75rem;border-bottom:2px solid var(--border-color);font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            <tr id="user-row-{{ u.id }}">
+                                <td style="padding:0.75rem;border-bottom:1px solid var(--border-color);">
+                                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                                        <div style="width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;">
+                                            {{ u.name|make_list|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div style="font-weight:600;font-size:0.85rem;">{{ u.name }}</div>
+                                            <div style="font-size:0.75rem;color:var(--text-muted);">{{ u.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding:0.75rem;border-bottom:1px solid var(--border-color);">
+                                    <span style="background:{% if u.role == 'admin' %}#7c3aed{% elif u.role == 'ngo' %}#0D9488{% elif u.role == 'innovator' %}#1A56DB{% else %}#6B7280{% endif %};color:#fff;padding:0.15rem 0.6rem;border-radius:6px;font-size:0.7rem;font-weight:600;text-transform:uppercase;">{{ u.role }}</span>
+                                </td>
+                                <td style="padding:0.75rem;border-bottom:1px solid var(--border-color);">
+                                    <span style="color:{% if u.is_active %}#0D9488{% else %}#ef4444{% endif %};font-size:0.8rem;font-weight:600;">
+                                        <i class="fa-solid {% if u.is_active %}fa-circle-check{% else %}fa-circle-xmark{% endif %}" style="margin-right:0.2rem;"></i>
+                                        {% if u.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                </td>
+                                <td style="padding:0.75rem;border-bottom:1px solid var(--border-color);font-size:0.8rem;color:var(--text-muted);">
+                                    {{ u.created_at|date:"d M Y" }}
+                                </td>
+                                <td style="padding:0.75rem;border-bottom:1px solid var(--border-color);">
+                                    <button onclick="toggleUser({{ u.id }})" style="background:none;border:1px solid var(--border-color);padding:0.3rem 0.6rem;border-radius:6px;font-size:0.75rem;cursor:pointer;color:var(--text-muted);" title="Toggle active status">
+                                        {% if u.is_active %}<i class="fa-solid fa-ban"></i> Disable{% else %}<i class="fa-solid fa-check"></i> Enable{% endif %}
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- AI Insights for Admin -->
+            <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
+                <h3 style="margin-bottom:1rem;">
+                    <i class="fa-solid fa-wand-magic-sparkles" style="margin-right:0.5rem;color:#7c3aed;"></i>AI Insights
+                </h3>
+                <div id="ai-insights-list">
+                    <div style="padding:1rem;text-align:center;color:var(--text-muted);">
+                        <i class="fa-solid fa-spinner fa-spin" style="margin-right:0.3rem;"></i> Analyzing platform data...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificate Issuance -->
+            <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
+                <h3 style="margin-bottom:1rem;">
+                    <i class="fa-solid fa-certificate" style="margin-right:0.5rem;color:#0D9488;"></i>Issue Certificate
+                </h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                    <div>
+                        <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.35rem;">Beneficiary</label>
+                        <select id="cert-beneficiary" style="width:100%;padding:0.6rem 0.75rem;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-surface);color:var(--text-primary);font-size:0.85rem;">
+                            <option value="">Select beneficiary...</option>
+                            {% for bene in beneficiary_users %}
+                            <option value="{{ bene.id }}">{{ bene.name }} ({{ bene.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:0.35rem;">Program (Pilot)</label>
+                        <select id="cert-pilot" style="width:100%;padding:0.6rem 0.75rem;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-surface);color:var(--text-primary);font-size:0.85rem;">
+                            <option value="">Select program...</option>
+                            {% for pilot in all_pilots %}
+                            <option value="{{ pilot.id }}">{{ pilot.title }} ({{ pilot.get_status_display }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="issue-cert-btn" onclick="issueCertificate()" style="width:100%;">
+                    <i class="fa-solid fa-award" style="margin-right:0.4rem;"></i> Issue Certificate
+                </button>
+                <div id="cert-result" style="margin-top:0.75rem;"></div>
+            </div>
+
+            <!-- Audit Log -->
+            <div class="card" style="padding:1.5rem;">
+                <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-clipboard-list"
+                        style="margin-right:0.5rem;color:#7c3aed;"></i>Recent Audit Log</h3>
+                <div id="admin-audit-log">
+                    {% for log in audit_logs %}
+                    <div style="display:flex;gap:0.75rem;padding:0.75rem;border-radius:8px;margin-bottom:0.5rem;background:var(--bg-secondary);border:1px solid var(--border-color);">
+                        <i class="fa-solid fa-{% if 'login' in log.action|lower %}right-to-bracket{% elif 'created' in log.action|lower %}plus-circle{% elif 'approved' in log.action|lower %}circle-check{% elif 'rejected' in log.action|lower %}circle-xmark{% else %}clock-rotate-left{% endif %}"
+                            style="color:{% if 'approved' in log.action|lower or 'accepted' in log.action|lower %}#0D9488{% elif 'rejected' in log.action|lower %}#ef4444{% else %}#1A56DB{% endif %};margin-top:3px;"></i>
+                        <div>
+                            <div style="font-size:0.85rem;color:var(--text-primary);font-weight:600;">{{ log.action }}</div>
+                            <div style="font-size:0.75rem;color:var(--text-muted);">
+                                {{ log.user.name|default:"System" }} · {{ log.details|truncatechars:60 }} · {{ log.created_at|timesince }} ago
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.85rem;">No audit logs yet.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.__USER__ = {{ user_json|safe }};
+
+        async function handleAssignment(id, action) {
+            const notes = document.getElementById('notes-' + id)?.value || '';
+            const card = document.getElementById('request-' + id);
+
+            try {
+                const res = await fetch('/api/assignments/' + id + '/action/', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: action, notes: notes })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const msg = data.message || (action === 'approve' ? 'Approved — Payment gateway opened for innovator' : 'Rejected');
+                    card.style.opacity = '0.5';
+                    card.innerHTML = '<div style="text-align:center;padding:1rem;color:' +
+                        (action === 'approve' ? '#0D9488' : '#ef4444') + ';font-weight:600;">' +
+                        '<i class="fa-solid ' + (action === 'approve' ? 'fa-check-circle' : 'fa-times-circle') + '" style="margin-right:0.3rem;"></i>' +
+                        msg + '</div>';
+                } else {
+                    alert(data.error || 'Action failed');
+                }
+            } catch (err) {
+                alert('Network error');
+            }
+        }
+
+        async function toggleUser(userId) {
+            try {
+                const res = await fetch('/api/admin/users/' + userId + '/toggle/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    location.reload();
+                }
+            } catch (err) {
+                alert('Error toggling user');
+            }
+        }
+
+        async function exportAuditLog() {
+            try {
+                const res = await fetch('/api/admin/audit-log/');
+                const data = await res.json();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'audit_log_export.json';
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                alert('Export failed');
+            }
+        }
+
+        // Issue Certificate
+        async function issueCertificate() {
+            const beneId = document.getElementById('cert-beneficiary').value;
+            const pilotId = document.getElementById('cert-pilot').value;
+            const resultEl = document.getElementById('cert-result');
+            const btn = document.getElementById('issue-cert-btn');
+
+            if (!beneId || !pilotId) {
+                resultEl.innerHTML = '<p style="color:#ef4444;font-size:0.85rem;">Please select both a beneficiary and a program.</p>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Issuing...';
+
+            try {
+                const res = await fetch('/api/certificates/issue/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ beneficiary_id: parseInt(beneId), pilot_id: parseInt(pilotId) })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    resultEl.innerHTML = `<div style="background:rgba(13,148,136,0.1);border:1px solid #0D9488;border-radius:10px;padding:0.75rem;font-size:0.85rem;color:#0D9488;">
+                        <i class="fa-solid fa-check-circle" style="margin-right:0.3rem;"></i>
+                        Certificate <strong>${data.certificate.certificate_number}</strong> issued successfully! Beneficiary has been notified.
+                    </div>`;
+                    document.getElementById('cert-beneficiary').value = '';
+                    document.getElementById('cert-pilot').value = '';
+                } else {
+                    resultEl.innerHTML = `<p style="color:#ef4444;font-size:0.85rem;"><i class="fa-solid fa-triangle-exclamation" style="margin-right:0.3rem;"></i>${data.error}</p>`;
+                }
+            } catch (e) {
+                resultEl.innerHTML = '<p style="color:#ef4444;font-size:0.85rem;">Network error. Please try again.</p>';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-award" style="margin-right:0.4rem;"></i> Issue Certificate';
+        }
+
+        // Load AI Insights
+        async function loadAdminInsights() {
+            const container = document.getElementById('ai-insights-list');
+            if (!container) return;
+            try {
+                const res = await fetch('/api/ai/insights/');
+                if (!res.ok) throw new Error('not ok');
+                const data = await res.json();
+                const insights = data.insights || [];
+                if (insights.length === 0) {
+                    container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;">No insights yet.</p>';
+                    return;
+                }
+                const typeColors = { info: '#1A56DB', success: '#0D9488', warning: '#d97706', ai: '#7c3aed' };
+                const typeBg = { info: 'rgba(26,86,219,0.08)', success: 'rgba(13,148,136,0.08)', warning: 'rgba(234,179,8,0.08)', ai: 'rgba(124,58,237,0.08)' };
+                container.innerHTML = insights.map(i => `
+                    <div style="display:flex;gap:0.75rem;padding:0.75rem;border-radius:10px;margin-bottom:0.4rem;background:${typeBg[i.type]||typeBg.info};border:1px solid ${typeColors[i.type]||typeColors.info}15;">
+                        <div style="width:34px;height:34px;border-radius:10px;background:${typeColors[i.type]||typeColors.info}18;color:${typeColors[i.type]||typeColors.info};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fa-solid ${i.icon || 'fa-lightbulb'}" style="font-size:0.8rem;"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight:600;font-size:0.82rem;color:var(--text-primary);margin-bottom:0.1rem;">${i.title}</div>
+                            <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.4;">${i.message}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;">Could not load insights.</p>';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadAdminInsights);
+    </script>
+</body>
+
+</html>

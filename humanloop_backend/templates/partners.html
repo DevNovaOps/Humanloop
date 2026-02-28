@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner NGOs - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'partners.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}"></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'index' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+
+            <div class="nav-links">
+                <a href="{% url 'index' %}">Home</a>
+                <a href="{% url 'about' %}">About</a>
+                <a href="{% url 'partners' %}" class="active">Partners</a>
+                <a href="{% url 'contact' %}">Contact</a>
+            </div>
+
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light Mode"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark Mode"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <a href="{% url 'login' %}" class="btn btn-secondary">Log in</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <h1>Our Partner Organizations</h1>
+            <p>Together with these incredible organizations, we're driving measurable social impact across India.</p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <div class="page-content">
+
+        <div class="partners-grid">
+            <div class="card partner-card">
+                <div class="partner-logo-circle">NS</div>
+                <div class="partner-info">
+                    <div class="partner-type">University Body</div>
+                    <h3>NSS India</h3>
+                    <p>National Service Scheme — engaging 3.8 million active members in community development across
+                        40,000+ units nationwide.</p>
+                </div>
+            </div>
+
+            <div class="card partner-card">
+                <div class="partner-logo-circle">GF</div>
+                <div class="partner-info">
+                    <div class="partner-type">Environmental NGO</div>
+                    <h3>GreenFuture Foundation</h3>
+                    <p>Leading environmental conservation initiatives focused on urban reforestation, clean water
+                        access, and waste management across 12 states.</p>
+                </div>
+            </div>
+
+            <div class="card partner-card">
+                <div class="partner-logo-circle">LH</div>
+                <div class="partner-info">
+                    <div class="partner-type">Healthcare NGO</div>
+                    <h3>LifeHope Health Initiative</h3>
+                    <p>Providing affordable healthcare and primary medical services to underserved rural communities,
+                        reaching 50,000+ beneficiaries annually.</p>
+                </div>
+            </div>
+
+            <div class="card partner-card">
+                <div class="partner-logo-circle">SE</div>
+                <div class="partner-info">
+                    <div class="partner-type">Education Trust</div>
+                    <h3>Spark Education Trust</h3>
+                    <p>Bridging the education gap through digital literacy programs, free tutoring centers, and
+                        scholarship programs for first-generation learners.</p>
+                </div>
+            </div>
+
+            <div class="card partner-card">
+                <div class="partner-logo-circle">UY</div>
+                <div class="partner-info">
+                    <div class="partner-type">Youth Empowerment</div>
+                    <h3>Urban Youth Collective</h3>
+                    <p>Empowering young leaders from marginalized urban communities through skill-building workshops,
+                        mentorship, and micro-enterprise support.</p>
+                </div>
+            </div>
+
+            <div class="card partner-card">
+                <div class="partner-logo-circle">CW</div>
+                <div class="partner-info">
+                    <div class="partner-type">Water & Sanitation</div>
+                    <h3>CleanWater Alliance</h3>
+                    <p>Deploying water purification systems and hygiene awareness campaigns in drought-prone regions,
+                        serving 200+ villages across southern India.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="partner-cta">
+            <h2>Become a Partner</h2>
+            <p>Want to amplify your organization's impact with HumanLoop? Let's work together.</p>
+            <a href="{% url 'contact' %}" class="btn btn-primary"><i class="fa-solid fa-handshake"
+                    style="margin-right: 0.5rem;"></i> Get in Touch</a>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="brand" style="font-size:0; margin-bottom: 1rem;">
+                        <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            style="height: 28px; width: 28px;">
+                            <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45"
+                                class="logo-stroke-blue" stroke-width="10" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                            <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                                stroke-linecap="round" />
+                            <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                        </svg>
+                        <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+                    </div>
+                    <p class="footer-description">Empowering communities to plan, pilot, and prove social impact through
+                        data-driven tools.</p>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Product</h4>
+                    <ul class="footer-list">
+                        <li class="footer-item"><a href="{% url 'planner' %}">Planning Tool</a></li>
+                        <li class="footer-item"><a href="{% url 'dashboard' %}">Impact Analytics</a></li>
+
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Company</h4>
+                    <ul class="footer-list">
+                        <li class="footer-item"><a href="{% url 'about' %}">About Us</a></li>
+                        <li class="footer-item"><a href="{% url 'partners' %}">Partner NGOs</a></li>
+                        <li class="footer-item"><a href="{% url 'contact' %}">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                &copy; 2024 HumanLoop Inc. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+
+    <script>
+        // Django-injected user data
+        window.__USER__ = {{ user_json|safe }};
+    </script>
+</body>
+
+</html>

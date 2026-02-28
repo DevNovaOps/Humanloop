@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan New Initiative - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'planner.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}"></script>
+    <style>
+        .planner-steps { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; }
+        .planner-step { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; cursor: pointer; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s; }
+        .planner-step.active { color: var(--primary); background: rgba(26, 86, 219, 0.08); }
+        .planner-step.completed { color: #0D9488; }
+        .planner-step .step-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; background: var(--bg-tertiary); color: var(--text-muted); }
+        .planner-step.active .step-num { background: var(--primary); color: #fff; }
+        .planner-step.completed .step-num { background: #0D9488; color: #fff; }
+        .step-arrow { color: var(--text-light); font-size: 0.8rem; }
+
+        .step-panel { display: none; }
+        .step-panel.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* NGO Cards */
+        .ngo-cards { display: grid; gap: 1rem; margin: 1.5rem 0; }
+        .ngo-card { border: 2px solid var(--border-color); border-radius: 12px; padding: 1.25rem; cursor: pointer; transition: all 0.3s; position: relative; }
+        .ngo-card:hover { border-color: var(--primary); box-shadow: 0 4px 20px rgba(26,86,219,0.1); }
+        .ngo-card.selected { border-color: #0D9488; background: rgba(13,148,136,0.04); }
+        .ngo-card.selected::after { content: '✓'; position: absolute; top: 12px; right: 12px; background: #0D9488; color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; }
+        .ngo-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+        .ngo-name { font-weight: 700; font-size: 1rem; color: var(--text-primary); }
+        .ngo-score { background: linear-gradient(135deg, #1A56DB, #0D9488); color: #fff; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .ngo-reasons { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+        .ngo-reason { background: var(--bg-tertiary); color: var(--text-muted); padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.72rem; }
+        .ngo-stats { display: flex; gap: 1.5rem; margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-muted); }
+
+        /* AI Plan Preview */
+        .ai-plan-box { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; max-height: 400px; overflow-y: auto; }
+        .ai-plan-box h3 { font-size: 1.15rem; color: var(--text-primary); margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+        .ai-plan-box h4 { font-size: 0.95rem; color: var(--primary); margin: 1rem 0 0.5rem 0; font-weight: 700; }
+        .ai-plan-box p { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.5rem; }
+        .ai-plan-box ul { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        .ai-plan-box li { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 0.2rem; }
+        .ai-plan-box li strong { color: var(--text-primary); }
+        .ai-plan-box pre { white-space: pre-wrap; font-family: inherit; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+
+        /* Summary Card */
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+        .summary-item { padding: 1rem; background: var(--bg-secondary); border-radius: 10px; }
+        .summary-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; }
+        .summary-value { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-top: 0.25rem; }
+
+        .loading-spinner { display: inline-block; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .no-ngo-msg { text-align: center; padding: 2rem; color: var(--text-muted); }
+        .no-ngo-msg i { font-size: 2rem; margin-bottom: 0.5rem; display: block; color: var(--text-light); }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'dashboard' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="nav-links"></div>
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <div class="nav-user-profile">
+                    <span class="text-medium-sm">{{ user.name|default:"User" }}</span>
+                    <div class="avatar-sm"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-section-title">Main Menu</div>
+            <nav class="sidebar-nav"></nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="container-left-aligned">
+
+                <!-- Step Indicator -->
+                <div class="planner-steps">
+                    <div class="planner-step active" id="step-ind-1" onclick="goToStep(1)">
+                        <span class="step-num">1</span>
+                        <span>Details</span>
+                    </div>
+                    <span class="step-arrow">→</span>
+                    <div class="planner-step" id="step-ind-2">
+                        <span class="step-num">2</span>
+                        <span>AI Review</span>
+                    </div>
+                    <span class="step-arrow">→</span>
+                    <div class="planner-step" id="step-ind-3">
+                        <span class="step-num">3</span>
+                        <span>Launch</span>
+                    </div>
+                </div>
+
+                <h1 class="h1-margin-sm">Plan a New Initiative</h1>
+                <p class="p-margin-lg">Our AI will match you with the best NGO partner and generate a detailed plan.</p>
+
+                <!-- ═══════════ STEP 1: Details ═══════════ -->
+                <div class="step-panel active" id="step-1">
+                    <div class="card" style="padding:1.5rem;">
+                        <form id="details-form" onsubmit="return goToAIReview(event)">
+                            <div class="form-group">
+                                <label for="activity_type">Type of Activity</label>
+                                <select id="activity_type" name="activity_type" class="input-field" required>
+                                    <option value="" disabled selected>Choose an area...</option>
+                                    <option value="education">📚 Education Drive</option>
+                                    <option value="health">🏥 Healthcare Camp</option>
+                                    <option value="environment">🌿 Environment / Cleanliness</option>
+                                    <option value="awareness">📣 Awareness Campaign</option>
+                                    <option value="food_distribution">🍽️ Food Distribution</option>
+                                    <option value="digital_literacy">💻 Digital Literacy</option>
+                                    <option value="housing_shelter">🏠 Housing / Shelter</option>
+                                    <option value="skill_development">👩‍🎓 Skill Development</option>
+                                    <option value="child_welfare">🧒 Child Welfare</option>
+                                    <option value="elder_care">👴 Elder Care</option>
+                                    <option value="cultural">🎭 Cultural Activity</option>
+                                    <option value="sports">🏃 Sports & Recreation</option>
+                                    <option value="water_sanitation">💧 Water & Sanitation</option>
+                                    <option value="animal_welfare">🐾 Animal Welfare</option>
+                                </select>
+                            </div>
+                            <div class="form-grid-row">
+                                <div class="form-group">
+                                    <label for="location">Location / Area</label>
+                                    <input type="text" id="location" class="input-field" placeholder="e.g. Gorwa, Vadodara" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="date">Target Date</label>
+                                    <input type="date" id="date" class="input-field" required min="">
+                                </div>
+                            </div>
+                            <div class="form-grid-row">
+                                <div class="form-group">
+                                    <label for="budget">Estimated Budget (₹)</label>
+                                    <input type="number" id="budget" class="input-field" placeholder="e.g. 25000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="members">Expected Members <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(optional — AI will estimate)</span></label>
+                                    <input type="number" id="members" class="input-field" placeholder="Leave blank for AI estimate">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="beneficiaries">Target Beneficiaries <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(optional — AI will estimate)</span></label>
+                                <input type="number" id="beneficiaries" class="input-field" placeholder="Leave blank for AI estimate">
+                            </div>
+                            <div class="form-group">
+                                <label for="pilot_title">Pilot Title (optional)</label>
+                                <input type="text" id="pilot_title" class="input-field" placeholder="e.g. Healthcare Camp: Phase 1">
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" id="step1-btn" class="btn btn-primary">
+                                    <i class="fa-solid fa-wand-magic-sparkles icon-margin-right"></i> Generate AI Plan & Find NGOs
+                                </button>
+                                <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ═══════════ STEP 2: AI Review ═══════════ -->
+                <div class="step-panel" id="step-2">
+                    <!-- AI Estimates Banner -->
+                    <div id="ai-estimates-banner" style="display:none;margin-bottom:1rem;">
+                        <div class="card" style="padding:1rem;border-left:4px solid #7c3aed;background:rgba(124,58,237,0.04);">
+                            <h4 style="margin-bottom:0.5rem;color:#7c3aed;"><i class="fa-solid fa-brain" style="margin-right:0.4rem;"></i> AI Auto-Estimates</h4>
+                            <div id="ai-estimates-content" style="font-size:0.88rem;color:var(--text-secondary);"></div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                            <h3 style="margin:0;"><i class="fa-solid fa-robot" style="color:var(--primary);margin-right:0.4rem;"></i> AI-Generated Plan</h3>
+                            <button class="btn btn-outline" onclick="regeneratePlan()" id="regenerate-btn" style="font-size:0.8rem;padding:0.4rem 1rem;">
+                                <i class="fa-solid fa-rotate" style="margin-right:0.3rem;"></i> Regenerate Plan
+                            </button>
+                        </div>
+                        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem;">Review the plan generated for your initiative. Not satisfied? Click <strong>Regenerate</strong> for a new version.</p>
+                        <div class="ai-plan-box" id="ai-plan-content">
+                            <pre>Loading...</pre>
+                        </div>
+                    </div>
+
+                    <!-- Budget Breakdown Card -->
+                    <div id="budget-breakdown-card" class="card" style="padding:1.5rem;margin-bottom:1.5rem;display:none;">
+                        <h3 style="margin-bottom:0.75rem;"><i class="fa-solid fa-chart-pie" style="color:#ea580c;margin-right:0.4rem;"></i> AI Budget Breakdown</h3>
+                        <div id="budget-breakdown-content" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.75rem;"></div>
+                    </div>
+
+                    <div class="card" style="padding:1.5rem;">
+                        <h3 style="margin-bottom:0.5rem;"><i class="fa-solid fa-handshake" style="color:#0D9488;margin-right:0.4rem;"></i> Recommended NGO Partners</h3>
+                        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.5rem;">Select an NGO to assign this pilot to. Your request will be reviewed by an admin, then sent to the NGO for acceptance.</p>
+
+                        <div id="ngo-cards-container" class="ngo-cards">
+                            <div style="text-align:center;padding:2rem;color:var(--text-muted);">
+                                <i class="fa-solid fa-spinner loading-spinner" style="font-size:1.5rem;margin-bottom:0.5rem;display:block;"></i>
+                                Searching for matching NGOs...
+                            </div>
+                        </div>
+
+                        <div class="form-actions" style="margin-top:1.5rem;">
+                            <button class="btn btn-primary" id="step2-btn" onclick="goToLaunch()" disabled>
+                                <i class="fa-solid fa-arrow-right icon-margin-right"></i> Continue to Launch
+                            </button>
+                            <button class="btn btn-outline" onclick="goToStep(1)">
+                                <i class="fa-solid fa-arrow-left icon-margin-right"></i> Back
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════ STEP 3: Launch ═══════════ -->
+                <div class="step-panel" id="step-3">
+                    <div class="card" style="padding:1.5rem;">
+                        <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-rocket" style="color:var(--primary);margin-right:0.4rem;"></i> Launch Summary</h3>
+                        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem;">Review your pilot details before submitting. Once submitted, your request will be sent to the admin for approval.</p>
+
+                        <div class="summary-grid" id="summary-grid">
+                            <!-- Filled by JS -->
+                        </div>
+
+                        <div id="selected-ngo-summary" style="margin:1rem 0;padding:1rem;background:rgba(13,148,136,0.06);border-radius:10px;border:1px solid #0D9488;">
+                            <!-- Filled by JS -->
+                        </div>
+
+                        <div style="background:var(--bg-secondary);border-radius:10px;padding:1rem;margin:1rem 0;border-left:4px solid var(--primary);">
+                            <p style="font-size:0.85rem;color:var(--text-muted);">
+                                <i class="fa-solid fa-info-circle" style="color:var(--primary);margin-right:0.3rem;"></i>
+                                <strong>What happens next?</strong> Your pilot request will be sent to the <strong>NGO</strong> for acceptance. Once the NGO accepts, it goes to <strong>Admin</strong> for verification. After admin approval, you'll be able to complete payment and the pilot becomes active.
+                            </p>
+                        </div>
+
+                        <div class="form-actions" style="margin-top:1.5rem;">
+                            <button class="btn btn-primary" id="launch-btn" onclick="submitPilot()">
+                                <i class="fa-solid fa-paper-plane icon-margin-right"></i> Submit for Approval
+                            </button>
+                            <button class="btn btn-outline" onclick="goToStep(2)">
+                                <i class="fa-solid fa-arrow-left icon-margin-right"></i> Back
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Success message -->
+                    <div id="launch-success" style="display:none;margin-top:1.5rem;">
+                        <div class="card" style="border-left:4px solid #0D9488;padding:1.5rem;">
+                            <h3 style="color:#0D9488;margin-bottom:0.5rem;">
+                                <i class="fa-solid fa-circle-check" style="margin-right:0.4rem;"></i> Pilot Submitted!
+                            </h3>
+                            <p id="launch-msg" style="color:var(--text-muted);font-size:0.9rem;">Your pilot has been submitted for admin approval.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.__USER__ = {{ user_json|safe }};
+
+        let formData = {};
+        let aiPlan = '';
+        let ngoRecommendations = [];
+        let selectedNgoId = null;
+        let currentStep = 1;
+
+        function goToStep(step) {
+            if (step > currentStep + 1) return;
+            // Update panels
+            document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('step-' + step).classList.add('active');
+            // Update indicators
+            for (let i = 1; i <= 3; i++) {
+                const ind = document.getElementById('step-ind-' + i);
+                ind.classList.remove('active', 'completed');
+                if (i < step) ind.classList.add('completed');
+                else if (i === step) ind.classList.add('active');
+            }
+            currentStep = step;
+        }
+
+        /* ── STEP 1 → STEP 2 ── */
+        async function goToAIReview(e) {
+            e.preventDefault();
+            const btn = document.getElementById('step1-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:0.4rem;"></i> Generating AI Plan...';
+
+            formData = {
+                activity_type: document.getElementById('activity_type').value,
+                location: document.getElementById('location').value,
+                date: document.getElementById('date').value,
+                budget: parseFloat(document.getElementById('budget').value) || 0,
+                members: parseInt(document.getElementById('members').value) || 0,
+                beneficiaries: parseInt(document.getElementById('beneficiaries').value) || 0,
+            };
+            const t = document.getElementById('pilot_title');
+            if (t && t.value.trim()) formData.title = t.value.trim();
+
+            try {
+                const res = await fetch('/api/ai/generate-plan/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const data = await res.json();
+                aiPlan = data.plan || '';
+                ngoRecommendations = data.ngo_recommendations || [];
+
+                // Render plan
+                document.getElementById('ai-plan-content').innerHTML =
+                    aiPlan || '<p style="color:var(--text-muted);text-align:center;padding:1rem;">No plan generated — the AI engine may be offline.</p>';
+
+                // Show AI estimates if auto-filled
+                if (data.estimates) {
+                    const est = data.estimates;
+                    const banner = document.getElementById('ai-estimates-banner');
+                    const content = document.getElementById('ai-estimates-content');
+                    let html = '';
+                    if (est.reasoning && est.reasoning.length > 0) {
+                        html += est.reasoning.map(r => `<div style="margin-bottom:0.3rem;"><i class="fa-solid fa-sparkles" style="color:#7c3aed;margin-right:0.3rem;"></i> ${r}</div>`).join('');
+                    }
+                    if (html) {
+                        content.innerHTML = html;
+                        banner.style.display = 'block';
+                    }
+                    // Auto-fill members & beneficiaries in formData
+                    if (!formData.members || formData.members === 0) formData.members = est.estimated_members;
+                    if (!formData.beneficiaries || formData.beneficiaries === 0) formData.beneficiaries = est.estimated_beneficiaries;
+
+                    // Show budget breakdown
+                    if (est.budget_breakdown) {
+                        const bbCard = document.getElementById('budget-breakdown-card');
+                        const bbContent = document.getElementById('budget-breakdown-content');
+                        bbContent.innerHTML = Object.entries(est.budget_breakdown).map(([k, v]) =>
+                            `<div style="padding:0.75rem;background:var(--bg-surface-hover);border-radius:8px;border:1px solid var(--border-color);">
+                                <div style="font-size:0.78rem;color:var(--text-muted);">${k}</div>
+                                <div style="font-weight:700;font-size:1.1rem;color:var(--text-primary);margin-top:0.2rem;">₹${v.toLocaleString('en-IN')}</div>
+                            </div>`
+                        ).join('');
+                        bbCard.style.display = 'block';
+                    }
+                }
+
+                // Render NGO cards
+                renderNgoCards(ngoRecommendations);
+
+                goToStep(2);
+            } catch (err) {
+                console.error('AI plan error:', err);
+                alert('Error generating plan. Please try again.');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles icon-margin-right"></i> Generate AI Plan & Find NGOs';
+            return false;
+        }
+
+        /* ── Regenerate Plan ── */
+        let regenerateCount = 0;
+        async function regeneratePlan() {
+            regenerateCount++;
+            const rBtn = document.getElementById('regenerate-btn');
+            rBtn.disabled = true;
+            rBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:0.3rem;"></i> Regenerating...';
+
+            // Add variation hint
+            const modifiedData = {...formData, regenerate: regenerateCount};
+
+            try {
+                const res = await fetch('/api/ai/generate-plan/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(modifiedData)
+                });
+                const data = await res.json();
+                aiPlan = data.plan || '';
+                document.getElementById('ai-plan-content').innerHTML =
+                    aiPlan || '<p style="color:var(--text-muted);text-align:center;padding:1rem;">No plan generated.</p>';
+
+                // Show toast
+                const toast = document.createElement('div');
+                toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#0D9488;color:#fff;padding:0.75rem 1.5rem;border-radius:10px;font-size:0.9rem;z-index:9999;animation:fadeIn 0.3s;';
+                toast.innerHTML = '<i class="fa-solid fa-check" style="margin-right:0.3rem;"></i> Plan regenerated!';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            } catch (err) {
+                alert('Error regenerating plan.');
+            }
+
+            rBtn.disabled = false;
+            rBtn.innerHTML = '<i class="fa-solid fa-rotate" style="margin-right:0.3rem;"></i> Regenerate Plan';
+        }
+
+        function renderNgoCards(ngos) {
+            const container = document.getElementById('ngo-cards-container');
+            if (!ngos || ngos.length === 0) {
+                container.innerHTML = '<div class="no-ngo-msg"><i class="fa-solid fa-building-circle-xmark"></i><p>No NGOs found on the platform yet.<br>You can still create the pilot as a draft.</p></div>';
+                document.getElementById('step2-btn').disabled = false;
+                return;
+            }
+
+            container.innerHTML = ngos.map((ngo, i) => `
+                <div class="ngo-card" id="ngo-card-${ngo.id}" onclick="selectNgo(${ngo.id})">
+                    <div class="ngo-card-header">
+                        <div>
+                            <div class="ngo-name">${i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : '🥉 '}${ngo.name}</div>
+                            <div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">${ngo.organization || ngo.email}</div>
+                        </div>
+                        <span class="ngo-score">Score: ${ngo.score}</span>
+                    </div>
+                    <div class="ngo-reasons">
+                        ${ngo.reasons.map(r => '<span class="ngo-reason">' + r + '</span>').join('')}
+                    </div>
+                    <div class="ngo-stats">
+                        <span><i class="fa-solid fa-folder" style="margin-right:0.3rem;"></i>${ngo.past_pilots} past pilot(s)</span>
+                        <span><i class="fa-solid fa-check-circle" style="margin-right:0.3rem;color:#0D9488;"></i>${ngo.completed_pilots} completed</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectNgo(id) {
+            selectedNgoId = id;
+            document.querySelectorAll('.ngo-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('ngo-card-' + id).classList.add('selected');
+            document.getElementById('step2-btn').disabled = false;
+        }
+
+        /* ── STEP 2 → STEP 3 ── */
+        function goToLaunch() {
+            // Build summary
+            const activityLabels = { education: '📚 Education Drive', health: '🏥 Healthcare Camp', environment: '🌿 Environment', awareness: '📣 Awareness Campaign', food_distribution: '🍽️ Food Distribution', digital_literacy: '💻 Digital Literacy', housing_shelter: '🏠 Housing/Shelter', skill_development: '👩‍🎓 Skill Development', child_welfare: '🧒 Child Welfare', elder_care: '👴 Elder Care', cultural: '🎭 Cultural', sports: '🏃 Sports', water_sanitation: '💧 Water & Sanitation', animal_welfare: '🐾 Animal Welfare' };
+            const grid = document.getElementById('summary-grid');
+            grid.innerHTML = `
+                <div class="summary-item"><div class="summary-label">Activity</div><div class="summary-value">${activityLabels[formData.activity_type] || formData.activity_type}</div></div>
+                <div class="summary-item"><div class="summary-label">Location</div><div class="summary-value">${formData.location}</div></div>
+                <div class="summary-item"><div class="summary-label">Target Date</div><div class="summary-value">${formData.date}</div></div>
+                <div class="summary-item"><div class="summary-label">Budget</div><div class="summary-value">₹${Number(formData.budget).toLocaleString('en-IN')}</div></div>
+                <div class="summary-item"><div class="summary-label">Members</div><div class="summary-value">${formData.members}</div></div>
+                <div class="summary-item"><div class="summary-label">Beneficiaries</div><div class="summary-value">${formData.beneficiaries || '—'}</div></div>
+            `;
+
+            // Selected NGO info
+            const ngoDiv = document.getElementById('selected-ngo-summary');
+            if (selectedNgoId) {
+                const ngo = ngoRecommendations.find(n => n.id === selectedNgoId);
+                if (ngo) {
+                    ngoDiv.innerHTML = `
+                        <div style="display:flex;align-items:center;gap:0.75rem;">
+                            <i class="fa-solid fa-building" style="font-size:1.5rem;color:#0D9488;"></i>
+                            <div>
+                                <div style="font-weight:700;color:var(--text-primary);">${ngo.name}</div>
+                                <div style="font-size:0.8rem;color:var(--text-muted);">Selected NGO Partner — Score: ${ngo.score}</div>
+                            </div>
+                        </div>
+                    `;
+                    ngoDiv.style.display = 'block';
+                }
+            } else {
+                ngoDiv.innerHTML = '<p style="font-size:0.85rem;color:var(--text-muted);">No NGO selected — pilot will be saved as draft.</p>';
+            }
+
+            goToStep(3);
+        }
+
+        /* ── STEP 3: Create pilot ── */
+        async function submitPilot() {
+            const btn = document.getElementById('launch-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:0.4rem;"></i> Submitting...';
+
+            const payload = {
+                ...formData,
+                ai_plan: aiPlan,
+                ai_ngo_recommendations: ngoRecommendations,
+            };
+            if (selectedNgoId) {
+                payload.selected_ngo_id = selectedNgoId;
+            }
+
+            try {
+                const res = await fetch('/api/pilots/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    document.getElementById('launch-success').style.display = 'block';
+                    const statusMsg = selectedNgoId
+                        ? 'It has been submitted for admin approval. You will be notified once the admin and NGO respond.'
+                        : 'It has been saved as a draft.';
+                    document.getElementById('launch-msg').textContent =
+                        '"' + result.pilot.title + '" — ' + statusMsg;
+                    btn.style.display = 'none';
+                    setTimeout(function() { window.location.href = '/pilot/'; }, 3000);
+                } else {
+                    alert(result.error || 'Failed to create pilot');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-paper-plane icon-margin-right"></i> Submit for Approval';
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Network error — please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane icon-margin-right"></i> Submit for Approval';
+            }
+        }
+    </script>
+</body>
+
+</html>

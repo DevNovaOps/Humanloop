@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}?v=2"></script>
+</head>
+
+<body class="dashboard-body">
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'dashboard' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+
+            <div class="nav-links"></div>
+
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <div class="nav-user-profile">
+                    <span class="text-medium-sm">{{ user.name|default:"User" }}</span>
+                    <div class="avatar-sm"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section-title">Main Menu</div>
+            <nav class="sidebar-nav">
+                <!-- Dynamic sidebar rendered by script.js -->
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="dashboard-page-header">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Welcome back, <strong>{{ user.name|default:"there" }}</strong>! Here's what's happening this week.</p>
+                </div>
+                <a href="{% url 'planner' %}" class="btn btn-primary"><i class="fa-solid fa-plus icon-margin-right"></i> New
+                    Initiative</a>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="feature-grid dashboard-metrics-grid">
+                <div class="card metric-card">
+                    <div class="metric-label">Total Pilots</div>
+                    <div id="stat-total-pilots" class="metric-value-lg">—</div>
+                    <div class="metric-subtext">Created by you</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Active Pilots</div>
+                    <div id="stat-active-pilots" class="metric-value-lg">—</div>
+                    <div class="metric-subtext">Currently running</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Beneficiaries Targeted</div>
+                    <div id="stat-beneficiaries" class="metric-value-lg">—</div>
+                    <div id="stat-budget-sub" class="metric-subtext">Total across pilots</div>
+                </div>
+            </div>
+
+            <!-- Recent Activity & Chart -->
+            <div class="layout-grid-dashboard">
+                <div class="card">
+                    <h3>Impact Trends</h3>
+                    <div id="chart-container" class="chart-container-body"></div>
+                </div>
+
+                <div class="card ai-insights-card" style="padding:1.5rem;">
+                    <h3 class="insights-title"><i class="fa-solid fa-wand-magic-sparkles" style="color:#7c3aed;margin-right:0.4rem;"></i> AI Insights</h3>
+                    <div id="ai-insights-list" class="insights-list" style="margin-top:0.75rem;">
+                        <div style="padding:1rem;text-align:center;color:var(--text-muted);">
+                            <i class="fa-solid fa-spinner fa-spin" style="margin-right:0.3rem;"></i> Analyzing your data...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Pilots & Payments -->
+            <div class="card" style="margin-top:1.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <h3 style="margin:0;"><i class="fa-solid fa-rocket" style="margin-right:0.4rem;color:#0D9488;"></i>My Pilots</h3>
+                    <a href="{% url 'planner' %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus" style="margin-right:0.3rem;"></i>New Pilot</a>
+                </div>
+                <div id="my-pilots-list" style="font-size:0.85rem;color:var(--text-muted);">
+                    <i class="fa-solid fa-spinner fa-spin" style="margin-right:0.3rem;"></i> Loading pilots...
+                </div>
+            </div>
+
+            <!-- Payment Toast -->
+            <div id="payment-toast" style="display:none;position:fixed;bottom:2rem;right:2rem;z-index:9999;padding:1rem 1.5rem;border-radius:12px;font-size:0.9rem;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,0.15);transition:all 0.3s;"></div>
+        </main>
+    </div>
+
+
+    <script>
+        // Django-injected user data
+        window.__USER__ = {{ user_json|safe }};
+    </script>
+
+    <script>
+        /* Load real innovator stats from backend */
+        async function loadInnovatorStats() {
+            try {
+                const res = await fetch('/api/dashboard/stats/');
+                if (!res.ok) return;
+                const d = await res.json();
+
+                const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; };
+                set('stat-total-pilots',  d.total_pilots);
+                set('stat-active-pilots', d.active_pilots);
+                set('stat-beneficiaries', d.total_beneficiaries);
+
+                // Update budget sub-label
+                if (d.total_budget != null) {
+                    const el = document.getElementById('stat-budget-sub');
+                    if (el) el.textContent = '₹' + Number(d.total_budget).toLocaleString('en-IN') + ' total budget';
+                }
+            } catch (e) { console.warn('Dashboard stats failed:', e); }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadInnovatorStats);
+
+        /* Load AI Insights from real data */
+        async function loadAIInsights() {
+            const container = document.getElementById('ai-insights-list');
+            if (!container) return;
+            try {
+                const res = await fetch('/api/ai/insights/');
+                if (!res.ok) throw new Error('not ok');
+                const data = await res.json();
+                const insights = data.insights || [];
+                if (insights.length === 0) {
+                    container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:0.5rem;">No insights available yet. Create your first pilot!</p>';
+                    return;
+                }
+                const typeColors = { info: '#1A56DB', success: '#0D9488', warning: '#d97706', ai: '#7c3aed' };
+                const typeBg = { info: 'rgba(26,86,219,0.08)', success: 'rgba(13,148,136,0.08)', warning: 'rgba(234,179,8,0.08)', ai: 'rgba(124,58,237,0.08)' };
+                container.innerHTML = insights.map(i => `
+                    <div style="display:flex;gap:0.75rem;padding:0.75rem;border-radius:10px;margin-bottom:0.4rem;background:${typeBg[i.type]||typeBg.info};border:1px solid ${typeColors[i.type]||typeColors.info}15;transition:transform 0.15s;">
+                        <div style="width:34px;height:34px;border-radius:10px;background:${typeColors[i.type]||typeColors.info}18;color:${typeColors[i.type]||typeColors.info};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fa-solid ${i.icon || 'fa-lightbulb'}" style="font-size:0.8rem;"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight:600;font-size:0.82rem;color:var(--text-primary);margin-bottom:0.1rem;">${i.title}</div>
+                            <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.4;">${i.message}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;">Could not load AI insights.</p>';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadAIInsights);
+
+        /* ═══ My Pilots with Assignment/Payment Status ═══ */
+        async function loadMyPilots() {
+            const container = document.getElementById('my-pilots-list');
+            if (!container) return;
+
+            try {
+                const pilotsRes = await fetch('/api/pilots/');
+                const pilots = await pilotsRes.json();
+
+                // Also fetch assignments
+                const assignRes = await fetch('/api/assignments/');
+                const assignments = await assignRes.json();
+
+                const pilotList = Array.isArray(pilots) ? pilots : (pilots.pilots || []);
+                const assignList = Array.isArray(assignments) ? assignments : (assignments.assignments || []);
+
+                if (pilotList.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:0.9rem;">No pilots yet. <a href="/planner/">Create your first pilot!</a></p>';
+                    return;
+                }
+
+                container.innerHTML = pilotList.map(p => {
+                    // Find assignment for this pilot
+                    const assign = assignList.find(a => a.pilot_id === p.id || (a.pilot && a.pilot.id === p.id));
+
+                    const statusMap = {
+                        'draft': { label: 'Draft', color: '#6B7280', bg: 'rgba(107,114,128,0.08)', icon: 'fa-pen' },
+                        'pending_ngo': { label: 'Pending NGO', color: '#d97706', bg: 'rgba(234,179,8,0.08)', icon: 'fa-clock' },
+                        'pending_admin': { label: 'NGO Accepted · Pending Admin', color: '#1A56DB', bg: 'rgba(26,86,219,0.08)', icon: 'fa-shield-halved' },
+                        'pending_payment': { label: 'Approved · Pay Now', color: '#7c3aed', bg: 'rgba(124,58,237,0.08)', icon: 'fa-credit-card' },
+                        'active': { label: 'Active', color: '#0D9488', bg: 'rgba(13,148,136,0.08)', icon: 'fa-circle-check' },
+                        'completed': { label: 'Completed', color: '#059669', bg: 'rgba(5,150,105,0.08)', icon: 'fa-trophy' },
+                        'paused': { label: 'Paused', color: '#6B7280', bg: 'rgba(107,114,128,0.08)', icon: 'fa-pause' },
+                    };
+
+                    const st = statusMap[p.status] || statusMap['draft'];
+                    const budget = Number(p.budget || 0);
+
+                    let payBtn = '';
+                    if (p.status === 'pending_payment' && assign) {
+                        const commission = (budget * 0.05).toFixed(2);
+                        const total = (budget * 1.05).toFixed(2);
+                        payBtn = `
+                            <div style="margin-top:0.75rem;padding:0.85rem;background:rgba(124,58,237,0.05);border:1px solid rgba(124,58,237,0.15);border-radius:10px;">
+                                <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:0.3rem;">
+                                    <span>Pilot Budget</span><strong>₹${budget.toLocaleString('en-IN')}</strong>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:0.3rem;">
+                                    <span>Platform Fee (5%)</span><strong>₹${Number(commission).toLocaleString('en-IN')}</strong>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;font-size:0.88rem;font-weight:700;padding-top:0.4rem;border-top:1px solid rgba(124,58,237,0.15);">
+                                    <span>Total</span><span style="color:#7c3aed;">₹${Number(total).toLocaleString('en-IN')}</span>
+                                </div>
+                                <button class="btn btn-primary" style="width:100%;margin-top:0.75rem;background:linear-gradient(135deg,#7c3aed,#6d28d9);border:none;font-size:0.88rem;"
+                                    onclick="initiatePayment(${assign.id})">
+                                    <i class="fa-solid fa-credit-card" style="margin-right:0.4rem;"></i>Pay ₹${Number(total).toLocaleString('en-IN')} Now
+                                </button>
+                            </div>`;
+                    }
+
+                    let ngoInfo = '';
+                    if (assign) {
+                        ngoInfo = `<span style="margin-left:0.75rem;font-size:0.78rem;color:var(--text-muted);"><i class="fa-solid fa-building-ngo" style="margin-right:0.2rem;"></i>${assign.requested_ngo_name || 'NGO'}</span>`;
+                    }
+
+                    return `
+                        <div style="padding:1rem;border-bottom:1px solid var(--border-color);transition:background 0.15s;">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                                <div style="flex:1;">
+                                    <div style="font-weight:600;font-size:0.95rem;color:var(--text-primary);margin-bottom:0.3rem;">
+                                        <a href="/pilot/?pilot_id=${p.id}" style="text-decoration:none;color:inherit;">${p.title}</a>
+                                        ${ngoInfo}
+                                    </div>
+                                    <div style="display:flex;gap:0.75rem;font-size:0.78rem;color:var(--text-muted);">
+                                        <span><i class="fa-solid fa-location-dot" style="margin-right:0.15rem;"></i>${p.location || '—'}</span>
+                                        <span><i class="fa-solid fa-indian-rupee-sign" style="margin-right:0.15rem;"></i>₹${budget.toLocaleString('en-IN')}</span>
+                                        <span><i class="fa-solid fa-calendar" style="margin-right:0.15rem;"></i>${p.target_date || '—'}</span>
+                                    </div>
+                                </div>
+                                <span style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.3rem 0.75rem;border-radius:6px;font-size:0.75rem;font-weight:600;background:${st.bg};color:${st.color};white-space:nowrap;">
+                                    <i class="fa-solid ${st.icon}" style="font-size:0.65rem;"></i>${st.label}
+                                </span>
+                            </div>
+                            ${payBtn}
+                        </div>`;
+                }).join('');
+
+            } catch (e) {
+                console.error('Failed to load pilots:', e);
+                container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem;">Failed to load pilots.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadMyPilots);
+
+        /* ═══ Payment Gateway Integration (Razorpay + Stripe) ═══ */
+        function showPaymentToast(msg, type) {
+            const t = document.getElementById('payment-toast');
+            if (!t) return;
+            t.textContent = msg;
+            t.style.display = 'block';
+            t.style.background = type === 'success' ? '#0D9488' : type === 'error' ? '#ef4444' : '#1A56DB';
+            t.style.color = '#fff';
+            setTimeout(() => { t.style.display = 'none'; }, 4000);
+        }
+
+        /* Show gateway choice modal */
+        function initiatePayment(assignmentId) {
+            // Create modal
+            let modal = document.getElementById('payment-gateway-modal');
+            if (modal) modal.remove();
+
+            modal = document.createElement('div');
+            modal.id = 'payment-gateway-modal';
+            modal.style.cssText = 'position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);';
+            modal.innerHTML = `
+                <div style="background:var(--bg-surface);border-radius:16px;padding:2rem;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                    <h3 style="margin-bottom:0.5rem;text-align:center;"><i class="fa-solid fa-credit-card" style="color:var(--primary);margin-right:0.4rem;"></i> Choose Payment Method</h3>
+                    <p style="text-align:center;color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem;">Select your preferred payment gateway</p>
+                    <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                        <button onclick="payWithRazorpay(${assignmentId})" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;border:2px solid var(--border-color);border-radius:12px;background:var(--bg-surface-hover);cursor:pointer;transition:all 0.2s;">
+                            <div style="width:44px;height:44px;background:#1a56db;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                                <span style="color:#fff;font-weight:700;font-size:0.9rem;">R</span>
+                            </div>
+                            <div style="text-align:left;">
+                                <div style="font-weight:700;color:var(--text-primary);font-size:1rem;">Razorpay</div>
+                                <div style="font-size:0.8rem;color:var(--text-muted);">UPI, Cards, Net Banking, Wallets</div>
+                            </div>
+                        </button>
+                        <button onclick="payWithStripe(${assignmentId})" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;border:2px solid var(--border-color);border-radius:12px;background:var(--bg-surface-hover);cursor:pointer;transition:all 0.2s;">
+                            <div style="width:44px;height:44px;background:#635bff;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                                <span style="color:#fff;font-weight:700;font-size:0.9rem;">S</span>
+                            </div>
+                            <div style="text-align:left;">
+                                <div style="font-weight:700;color:var(--text-primary);font-size:1rem;">Stripe</div>
+                                <div style="font-size:0.8rem;color:var(--text-muted);">International Cards, Google Pay, Apple Pay</div>
+                            </div>
+                        </button>
+                    </div>
+                    <button onclick="document.getElementById('payment-gateway-modal').remove()" style="margin-top:1rem;width:100%;padding:0.6rem;border:none;background:transparent;color:var(--text-muted);cursor:pointer;font-size:0.85rem;">Cancel</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+        }
+
+        /* ── Razorpay flow ── */
+        async function payWithRazorpay(assignmentId) {
+            document.getElementById('payment-gateway-modal')?.remove();
+            showPaymentToast('Creating Razorpay order...', 'info');
+
+            try {
+                const res = await fetch('/api/payments/create-order/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ assignment_id: assignmentId })
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    showPaymentToast(data.error || 'Failed to create order', 'error');
+                    return;
+                }
+
+                const order = data.order;
+                const payment = data.payment;
+                const user = window.__USER__ || {};
+
+                const options = {
+                    key: order.key,
+                    amount: order.amount,
+                    currency: order.currency,
+                    name: 'HumanLoop',
+                    description: `Pilot: ${payment.pilot_title}`,
+                    order_id: order.id,
+                    prefill: {
+                        name: user.name || '',
+                        email: user.email || '',
+                        contact: user.mobile || '9999999999',
+                    },
+                    theme: { color: '#1A56DB' },
+                    handler: async function(response) {
+                        showPaymentToast('Verifying payment...', 'info');
+                        try {
+                            const verifyRes = await fetch('/api/payments/verify/', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                })
+                            });
+                            const verifyData = await verifyRes.json();
+
+                            if (verifyData.success) {
+                                showPaymentToast('🎉 Payment successful! Pilot is now active!', 'success');
+                                setTimeout(() => location.reload(), 2000);
+                            } else {
+                                showPaymentToast(verifyData.error || 'Payment verification failed', 'error');
+                            }
+                        } catch (e) {
+                            showPaymentToast('Payment verification failed. Contact support.', 'error');
+                        }
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            showPaymentToast('Payment cancelled', 'error');
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.on('payment.failed', function(response) {
+                    showPaymentToast('Payment failed: ' + (response.error.description || 'Please try again'), 'error');
+                });
+                rzp.open();
+
+            } catch (e) {
+                showPaymentToast('Network error. Please try again.', 'error');
+            }
+        }
+
+        /* ── Stripe flow ── */
+        async function payWithStripe(assignmentId) {
+            document.getElementById('payment-gateway-modal')?.remove();
+            showPaymentToast('Redirecting to Stripe checkout...', 'info');
+
+            try {
+                const res = await fetch('/api/payments/stripe/create-session/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ assignment_id: assignmentId })
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    showPaymentToast(data.error || 'Failed to create Stripe session', 'error');
+                    return;
+                }
+
+                // Redirect to Stripe hosted checkout
+                window.location.href = data.checkout_url;
+
+            } catch (e) {
+                showPaymentToast('Network error. Please try again.', 'error');
+            }
+        }
+    </script>
+
+    <!-- Razorpay Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</body>
+
+</html>

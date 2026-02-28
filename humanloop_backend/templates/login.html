@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'login.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}"></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'index' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+
+            <div class="nav-links"></div>
+
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <span class="nav-auth-text">Don't have an account?</span>
+                <a href="{% url 'register' %}" class="btn btn-secondary btn-sm">Sign up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="auth-container">
+        <div class="auth-card card" id="loginCard">
+            <div class="auth-header">
+                <div class="auth-icon-wrapper" id="lockIcon">
+                    <i class="fa-solid fa-lock" id="lockSymbol"></i>
+                </div>
+                <h2 id="loginTitle">Welcome back</h2>
+                <p id="loginSubtitle">Enter your credentials to access your dashboard.</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="input-field" placeholder="name@organization.org" required>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-header-group">
+                        <label for="password" class="label-no-margin">Password</label>
+                        <a href="{% url 'forgot_password' %}" class="link-primary">Forgot?</a>
+                    </div>
+                    <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+                    <!-- Password Requirements Checklist -->
+                    <div class="password-requirements" id="passwordRequirements">
+                        <div class="req-item" id="reqLength">
+                            <span class="req-dot"></span>
+                            <span>At least 8 characters</span>
+                        </div>
+                        <div class="req-item" id="reqCapital">
+                            <span class="req-dot"></span>
+                            <span>One uppercase letter</span>
+                        </div>
+                        <div class="req-item" id="reqNumber">
+                            <span class="req-dot"></span>
+                            <span>One number</span>
+                        </div>
+                        <div class="req-item" id="reqSymbol">
+                            <span class="req-dot"></span>
+                            <span>One special symbol (!@#$...)</span>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <button type="submit" class="btn btn-primary btn-block" id="signInBtn">Sign In</button>
+            </form>
+
+            <div class="auth-footer">
+                <p class="auth-secure-text">Protected by HumanLoop SecureAuth&trade;</p>
+            </div>
+
+            <!-- Success message (hidden initially) -->
+            <div class="login-success-msg" id="successMsg">
+                <div class="success-checkmark-ring">
+                    <svg viewBox="0 0 52 52">
+                        <circle class="success-circle" cx="26" cy="26" r="24" fill="none" stroke="#10B981"
+                            stroke-width="3" />
+                        <path class="success-check" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round"
+                            stroke-linejoin="round" d="M15 27 l7 7 15-15" />
+                    </svg>
+                </div>
+                <h3>Access Granted</h3>
+                <p id="redirectMsg">Redirecting to your dashboard...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Script -->
+    <script>
+        // Look up stored role for a given email from registered users
+        function getStoredRole(email) {
+            const users = JSON.parse(localStorage.getItem('humanloop_registered_users') || '[]');
+            const found = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+            return found ? found.role : 'innovator';
+        }
+
+        // Password requirement validation
+        const pwdInput = document.getElementById('password');
+        const checks = {
+            reqLength: v => v.length >= 8,
+            reqCapital: v => /[A-Z]/.test(v),
+            reqNumber: v => /[0-9]/.test(v),
+            reqSymbol: v => /[^A-Za-z0-9]/.test(v)
+        };
+
+        pwdInput.addEventListener('input', () => {
+            const val = pwdInput.value;
+            for (const [id, test] of Object.entries(checks)) {
+                const el = document.getElementById(id);
+                el.classList.toggle('met', test(val));
+            }
+        });
+
+        function allPasswordReqsMet() {
+            const val = pwdInput.value;
+            return Object.values(checks).every(test => test(val));
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Check if this is a 2FA verification submission
+            const twofaInput = document.getElementById('twofa-login-code');
+            if (twofaInput) {
+                await handle2FAVerify(twofaInput.value.trim());
+                return;
+            }
+
+            if (!allPasswordReqsMet()) {
+                document.getElementById('passwordRequirements').classList.add('shake');
+                setTimeout(() => document.getElementById('passwordRequirements').classList.remove('shake'), 600);
+                return;
+            }
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const card = document.getElementById('loginCard');
+            const lockIcon = document.getElementById('lockIcon');
+            const lockSymbol = document.getElementById('lockSymbol');
+            const title = document.getElementById('loginTitle');
+            const subtitle = document.getElementById('loginSubtitle');
+            const form = document.getElementById('loginForm');
+            const btn = document.getElementById('signInBtn');
+            const successMsg = document.getElementById('successMsg');
+
+            // Show or create error message element
+            let errorEl = document.getElementById('login-error');
+            if (!errorEl) {
+                errorEl = document.createElement('div');
+                errorEl.id = 'login-error';
+                errorEl.style.cssText = 'color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:0.75rem 1rem;font-size:0.875rem;margin-bottom:1rem;display:none;';
+                form.prepend(errorEl);
+            }
+            errorEl.style.display = 'none';
+
+            // Disable button and show spinner
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing in...';
+
+            try {
+                const response = await fetch('/api/login/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                // 2FA required — show code input
+                if (data.requires_2fa) {
+                    show2FAStep();
+                    return;
+                }
+
+                if (data.success) {
+                    completeLoginAnimation(data);
+                } else {
+                    errorEl.textContent = data.error || 'Login failed. Please check your credentials.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Sign In';
+                }
+            } catch (err) {
+                errorEl.textContent = 'Network error. Is the Django server running?';
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = 'Sign In';
+            }
+        });
+
+        // Show 2FA code input step
+        function show2FAStep() {
+            const form = document.getElementById('loginForm');
+            const lockSymbol = document.getElementById('lockSymbol');
+            const title = document.getElementById('loginTitle');
+            const subtitle = document.getElementById('loginSubtitle');
+
+            // Change lock icon to shield
+            lockSymbol.className = 'fa-solid fa-shield-halved';
+            title.textContent = 'Two-Factor Authentication';
+            subtitle.textContent = 'Enter the 6-digit code from your authenticator app.';
+
+            form.innerHTML = `
+                <div id="login-error" style="display:none;color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:0.75rem 1rem;font-size:0.875rem;margin-bottom:1rem;"></div>
+                <div style="text-align:center;margin-bottom:1.5rem;">
+                    <div style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.2rem;background:rgba(13,148,136,0.08);border:1px solid rgba(13,148,136,0.2);border-radius:8px;font-size:0.82rem;color:#0D9488;font-weight:600;">
+                        <i class="fa-solid fa-mobile-screen"></i>
+                        Check your authenticator app
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="twofa-login-code">Verification Code</label>
+                    <input type="text" id="twofa-login-code" class="input-field" maxlength="6" pattern="[0-9]*"
+                        inputmode="numeric" placeholder="000000" autofocus required
+                        style="text-align:center;font-size:1.5rem;letter-spacing:6px;font-weight:700;padding:0.85rem;">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" id="twofa-submit-btn">
+                    <i class="fa-solid fa-shield-check" style="margin-right:0.4rem;"></i>Verify & Sign In
+                </button>
+                <div style="text-align:center;margin-top:0.75rem;">
+                    <a href="/login/" style="font-size:0.82rem;color:var(--text-muted);text-decoration:none;">
+                        <i class="fa-solid fa-arrow-left" style="margin-right:0.3rem;"></i>Back to login
+                    </a>
+                </div>
+            `;
+            // Auto-focus the code input
+            setTimeout(() => document.getElementById('twofa-login-code')?.focus(), 100);
+        }
+
+        // Handle 2FA verification
+        async function handle2FAVerify(code) {
+            const btn = document.getElementById('twofa-submit-btn');
+            const errorEl = document.getElementById('login-error');
+
+            if (!code || code.length !== 6) {
+                errorEl.textContent = 'Please enter the 6-digit code from your authenticator app.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            errorEl.style.display = 'none';
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+
+            try {
+                const res = await fetch('/api/2fa/verify-login/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    completeLoginAnimation(data);
+                } else {
+                    errorEl.textContent = data.error || 'Invalid code. Please try again.';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-shield-check" style="margin-right:0.4rem;"></i>Verify & Sign In';
+                    document.getElementById('twofa-login-code').value = '';
+                    document.getElementById('twofa-login-code').focus();
+                }
+            } catch (err) {
+                errorEl.textContent = 'Network error';
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-shield-check" style="margin-right:0.4rem;"></i>Verify & Sign In';
+            }
+        }
+
+        // Complete login with success animation
+        function completeLoginAnimation(data) {
+            const user = data.user;
+            const dashboard = data.redirect || RBAC.getDashboardForRole(user.role);
+            const card = document.getElementById('loginCard');
+            const lockIcon = document.getElementById('lockIcon');
+            const lockSymbol = document.getElementById('lockSymbol');
+            const title = document.getElementById('loginTitle');
+            const subtitle = document.getElementById('loginSubtitle');
+            const form = document.getElementById('loginForm');
+            const successMsg = document.getElementById('successMsg');
+
+            AuthManager.login(user.email, user.role, user);
+
+            // Play unlock animation
+            setTimeout(() => { lockIcon.classList.add('lock-shake'); }, 400);
+            setTimeout(() => {
+                lockIcon.classList.remove('lock-shake');
+                lockIcon.classList.add('lock-unlocking');
+                lockSymbol.className = 'fa-solid fa-lock-open';
+                lockIcon.classList.add('lock-success');
+            }, 1200);
+            setTimeout(() => {
+                lockIcon.classList.add('lock-bounce');
+                form.classList.add('login-form-exit');
+                title.classList.add('login-text-exit');
+                subtitle.classList.add('login-text-exit');
+                setTimeout(() => { successMsg.classList.add('visible'); }, 400);
+            }, 1700);
+            setTimeout(() => {
+                card.classList.add('card-success-glow');
+                const dest = dashboard.startsWith('/') ? dashboard : '/' + dashboard + '/';
+                setTimeout(() => { window.location.href = dest; }, 800);
+            }, 2800);
+        }
+    </script>
+
+
+    <script>
+        // Django-injected user data
+        window.__USER__ = {{ user_json|safe }};
+    </script>
+</body>
+
+</html>

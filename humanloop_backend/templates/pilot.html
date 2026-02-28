@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Pilot - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'pilot.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}?v=2"></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'dashboard' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+
+            <div class="nav-links"></div>
+
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <div class="nav-user-profile">
+                    <span class="text-medium-sm">{{ user.name|default:"User" }}</span>
+                    <div class="avatar-sm"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-section-title">Main Menu</div>
+            <nav class="sidebar-nav">
+                <!-- Dynamic sidebar rendered by script.js -->
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            {% if pilots|length > 1 %}
+            <!-- Pilot Selector -->
+            <div style="margin-bottom:1rem;display:flex;align-items:center;gap:0.75rem;">
+                <label style="font-size:0.85rem;font-weight:600;color:var(--text-muted);white-space:nowrap;">
+                    <i class="fa-solid fa-rocket" style="margin-right:0.3rem;"></i>Select Pilot:
+                </label>
+                <select id="pilot-selector" onchange="window.location.href='/pilot/?pilot_id=' + this.value"
+                    style="flex:1;padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:0.88rem;cursor:pointer;max-width:400px;">
+                    {% for p in pilots %}
+                    <option value="{{ p.id }}" {% if p.id == selected_pilot_id %}selected{% endif %}>
+                        {{ p.title }} — {{ p.location }} ({{ p.get_status_display }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            {% if pilots and pilots|length > 0 %}
+            {% with pilot=pilots.0 %}
+
+            <!-- Pilot Header Card -->
+            <div class="pilot-header-card">
+                <div>
+                    <div class="pilot-meta-row">
+                        <span class="status-badge {% if pilot.status == 'active' %}progress{% elif pilot.status == 'completed' %}completed{% else %}draft{% endif %}">
+                            <i class="fa-solid fa-circle" style="font-size: 0.5rem; margin-right: 0.3rem;"></i>
+                            {{ pilot.get_status_display|upper }}
+                        </span>
+                        <span class="pilot-date" id="pilot-date">{{ pilot.target_date|date:"M d, Y" }}</span>
+                    </div>
+                    <h1 id="pilot-title" class="pilot-title-lg">{{ pilot.title }}</h1>
+                    <p><i class="fa-solid fa-location-dot icon-margin-right"></i> <span id="pilot-location">{{ pilot.location }}</span></p>
+                </div>
+                <div id="pilot-actions">
+                    {% if pilot.status != 'completed' %}
+                    <button id="complete-pilot-btn" class="btn btn-outline btn-sm" style="margin-left: 0.5rem;" 
+                            onclick="markPilotComplete({{ pilot.id }})">
+                        <i class="fa-solid fa-check icon-margin-right"></i> Mark Complete
+                    </button>
+                    {% else %}
+                    <span class="status-badge completed" style="font-size:0.85rem;padding:0.5rem 1rem;">
+                        <i class="fa-solid fa-check-circle" style="margin-right:0.3rem;"></i> Completed
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="layout-grid-dashboard">
+                <!-- Tasks Column -->
+                <div id="section-task-checklist">
+                    <div class="card">
+                        <h3 class="h1-margin-sm">Task Checklist</h3>
+                        <p class="p-margin-lg">Complete all tasks to finish this pilot.</p>
+                        <div class="progress-header">
+                            <span>Progress</span>
+                            <span id="task-progress-text">{{ pilot.progress }}%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-fill" id="task-progress-fill" style="width:{{ pilot.progress }}%"></div>
+                        </div>
+                        <div id="pilot-tasks-list" class="pilot-tasks-list" style="margin-top: 1.5rem;">
+                            <!-- Tasks rendered by JS below -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Info Column -->
+                <div class="sidebar-info-col">
+                    <div class="card" id="section-financials">
+                        <div class="financials-header">
+                            <h3 class="financials-title">Financials</h3>
+                            {% if user.role == 'ngo' or user.role == 'admin' %}
+                            <a href="{% url 'expenses' %}" class="link-sm-primary">Manage →</a>
+                            {% else %}
+                            <a href="{% url 'expenses' %}" class="link-sm-primary">View →</a>
+                            {% endif %}
+                        </div>
+                        <div class="financial-row-lg">
+                            <span class="insight-text-muted">Budget Allocated</span>
+                            <strong id="pilot-budget-total">₹{{ pilot.budget|floatformat:"0" }}</strong>
+                        </div>
+                        <div class="financial-row">
+                            <span class="insight-text-muted">Spent</span>
+                            <span class="spent-amount" id="pilot-budget-spent">₹0</span>
+                        </div>
+                        <div class="budget-bar-container" style="margin-top: 1rem;">
+                            <div class="budget-bar-fill" id="pilot-budget-bar"></div>
+                        </div>
+                    </div>
+
+                    {% if user.role == 'ngo' %}
+                    <!-- Team Members (NGO only) -->
+                    <div class="card" style="margin-top:1rem;">
+                        <h3 style="margin-bottom:0.75rem;font-size:1rem;">
+                            <i class="fa-solid fa-users" style="margin-right:0.4rem;color:#3B82F6;"></i>Team Members
+                        </h3>
+                        <div id="pilot-team-list" style="font-size:0.85rem;color:var(--text-muted);">
+                            Loading...
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- AI Suggestion — hidden until RAG engine is configured -->
+                    <div class="card suggestion-card-amber" style="display:none;">
+                        <h4 class="suggestion-title-amber"><i
+                                class="fa-solid fa-wand-magic-sparkles icon-margin-right"></i> AI Suggestion</h4>
+                        <p class="suggestion-text" id="pilot-ai-suggestion">Loading AI suggestion...</p>
+                    </div>
+                </div>
+            </div>
+
+            {% endwith %}
+            {% else %}
+            <div class="card" style="padding:3rem;text-align:center;">
+                <i class="fa-solid fa-folder-open" style="font-size:3rem;opacity:0.2;display:block;margin-bottom:1rem;"></i>
+                <p style="color:var(--text-muted);">No pilots found. Create one from the <a href="{% url 'planner' %}">Planner</a>.</p>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+
+
+    <script>
+        // Django-injected data
+        window.__USER__ = {{ user_json|safe }};
+
+        {% if pilots and pilots|length > 0 %}
+        const PILOT_ID = {{ pilots.0.id }};
+        const PILOT_TASKS = {{ pilots.0.tasks_json|safe }};
+
+        // ── Render & manage task list ──
+        function renderTasks(tasks) {
+            const listEl = document.getElementById('pilot-tasks-list');
+            if (!listEl) return;
+            if (!tasks || tasks.length === 0) {
+                listEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;">No tasks yet.</p>';
+                return;
+            }
+            listEl.innerHTML = tasks.map((t, i) => `
+                <div class="task-item" style="display:flex;align-items:center;gap:0.75rem;padding:1rem 1.25rem;border-bottom:1px solid var(--border-color);transition:background 0.15s;">
+                    <input type="checkbox" id="task-${i}" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})"
+                        style="width:18px;height:18px;accent-color:#0D9488;cursor:pointer;">
+                    <label for="task-${i}" style="cursor:pointer;flex:1;font-size:0.92rem;${t.done ? 'text-decoration:line-through;opacity:0.5;' : ''}">
+                        ${t.name}
+                    </label>
+                </div>
+            `).join('');
+            updateProgress(tasks);
+        }
+
+        function updateProgress(tasks) {
+            const done = tasks.filter(t => t.done).length;
+            const pct = tasks.length ? Math.round(done / tasks.length * 100) : 0;
+            const textEl = document.getElementById('task-progress-text');
+            const fillEl = document.getElementById('task-progress-fill');
+            if (textEl) textEl.textContent = pct + '%';
+            if (fillEl) fillEl.style.width = pct + '%';
+        }
+
+        async function toggleTask(idx) {
+            PILOT_TASKS[idx].done = !PILOT_TASKS[idx].done;
+            renderTasks(PILOT_TASKS);
+            // Persist to server
+            try {
+                const res = await fetch(`/api/pilots/${PILOT_ID}/`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tasks: PILOT_TASKS })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    // Revert on failure
+                    PILOT_TASKS[idx].done = !PILOT_TASKS[idx].done;
+                    renderTasks(PILOT_TASKS);
+                    console.error('Failed to save task:', data.error || 'Unknown error');
+                    alert('Failed to save task. Please try again.');
+                } else {
+                    // Update progress from server response
+                    const textEl = document.getElementById('task-progress-text');
+                    const fillEl = document.getElementById('task-progress-fill');
+                    if (textEl) textEl.textContent = data.progress + '%';
+                    if (fillEl) fillEl.style.width = data.progress + '%';
+                }
+            } catch (e) {
+                // Revert on network error
+                PILOT_TASKS[idx].done = !PILOT_TASKS[idx].done;
+                renderTasks(PILOT_TASKS);
+                console.error('Network error saving task:', e);
+                alert('Network error — could not save task.');
+            }
+        }
+
+        async function markPilotComplete(pilotId) {
+            if (!confirm('Mark this pilot as completed? This cannot be undone easily.')) return;
+            try {
+                const res = await fetch(`/api/pilots/${pilotId}/`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'completed' })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    location.reload();
+                }
+            } catch (e) {
+                alert('Failed to mark complete');
+            }
+        }
+
+        // ── Load pilot details (spent, team, FRESH tasks) ──
+        async function loadPilotDetails() {
+            try {
+                const res = await fetch(`/api/pilots/${PILOT_ID}/`);
+                const data = await res.json();
+
+                // Load fresh tasks from server (overrides template data)
+                if (data.tasks && data.tasks.length > 0) {
+                    PILOT_TASKS.length = 0;
+                    data.tasks.forEach(t => PILOT_TASKS.push(t));
+                    renderTasks(PILOT_TASKS);
+                }
+
+                // Spent
+                const spentEl = document.getElementById('pilot-budget-spent');
+                if (spentEl) spentEl.textContent = '₹' + Number(data.spent || 0).toLocaleString('en-IN');
+
+                // Budget bar
+                const barEl = document.getElementById('pilot-budget-bar');
+                if (barEl && data.budget > 0) {
+                    const pct = Math.min(100, (data.spent / data.budget) * 100);
+                    barEl.style.width = pct + '%';
+                    barEl.style.background = pct > 80 ? '#ef4444' : '#0D9488';
+                }
+
+                // Team
+                const teamEl = document.getElementById('pilot-team-list');
+                if (teamEl) {
+                    if (data.team && data.team.length > 0) {
+                        teamEl.innerHTML = data.team.map(m =>
+                            `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;border-bottom:1px solid var(--border-color);">
+                                <div style="width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;">${m.name.charAt(0).toUpperCase()}</div>
+                                <div>
+                                    <div style="font-weight:600;font-size:0.85rem;color:var(--text-primary);">${m.name}</div>
+                                    <div style="font-size:0.72rem;color:var(--text-muted);">${m.role || 'Member'}</div>
+                                </div>
+                            </div>`
+                        ).join('');
+                    } else {
+                        teamEl.innerHTML = '<p style="font-size:0.82rem;color:var(--text-muted);">No team members assigned yet.</p>';
+                    }
+                }
+
+                // AI suggestion
+                const aiEl = document.getElementById('pilot-ai-suggestion');
+                if (aiEl) {
+                    if (data.ai_plan) {
+                        const lines = data.ai_plan.split('\n').filter(l => l.trim().length > 10);
+                        aiEl.textContent = lines[0] || 'AI engine is not available. Please ensure the RAG engine is properly configured.';
+                    } else {
+                        aiEl.textContent = 'AI engine is not available. Please ensure the RAG engine is properly configured.';
+                    }
+                }
+
+            } catch (e) {
+                console.error('Failed to load pilot details:', e);
+            }
+        }
+
+        // Init — render template tasks immediately, then refresh from API
+        renderTasks(PILOT_TASKS);
+        loadPilotDetails();
+        {% endif %}
+
+        // ── Role-based access: restrict to read-only for admin & innovator ──
+        document.addEventListener('DOMContentLoaded', function() {
+            const u = window.__USER__;
+            if (!u) return;
+            
+            if (u.role === 'admin') {
+                // Admin: hide task checklist, financials, mark complete
+                const hide = id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; };
+                hide('section-task-checklist');
+                hide('section-financials');
+                hide('pilot-actions');
+            }
+
+            if (u.role === 'innovator') {
+                // Innovator: read-only task progress view
+                // Hide financials and mark-complete (only NGO can manage)
+                const hide = id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; };
+                hide('section-financials');
+                hide('pilot-actions');
+
+                // Make tasks read-only (disable checkboxes)
+                const taskList = document.getElementById('pilot-tasks-list');
+                if (taskList) {
+                    // Override rendering to show read-only tasks
+                    const observer = new MutationObserver(() => {
+                        taskList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                            cb.disabled = true;
+                            cb.style.cursor = 'not-allowed';
+                            cb.style.opacity = '0.6';
+                        });
+                    });
+                    observer.observe(taskList, { childList: true, subtree: true });
+                    // Also apply immediately
+                    taskList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                        cb.disabled = true;
+                        cb.style.cursor = 'not-allowed';
+                        cb.style.opacity = '0.6';
+                    });
+                }
+
+                // Add a note explaining read-only
+                const headerCard = document.querySelector('.pilot-header-card');
+                if (headerCard) {
+                    const note = document.createElement('div');
+                    note.style.cssText = 'background:rgba(26,86,219,0.08);border:1px solid rgba(26,86,219,0.2);border-radius:10px;padding:0.75rem 1rem;margin-top:0.75rem;font-size:0.82rem;color:#1A56DB;display:flex;align-items:center;gap:0.5rem;';
+                    note.innerHTML = '<i class="fa-solid fa-info-circle"></i> <span>You are viewing task progress updated by the assigned NGO. Tasks are managed by NGO partners.</span>';
+                    headerCard.after(note);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

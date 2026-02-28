@@ -1,0 +1,7 @@
+Pilot Case Study: Digital Farmer Advisory in Uttar Pradesh, India
+
+A two-year pilot (2020–2022) tested a mobile-based agricultural advisory service for 5,000 smallholder farmers in Uttar Pradesh. Farmers received localized, real-time recommendations on crop selection, irrigation timing, pest management, and market prices via WhatsApp and IVR (interactive voice response). The advisory system combined satellite imagery, weather forecasts, and soil data with expert agronomic rules.
+
+Farmers who received the full advisory service saw 18% higher yields and 12% higher net income compared to a control group. Adoption was highest among younger farmers and those with basic smartphone literacy. IVR proved essential for farmers without smartphones or literacy—45% of users accessed advice via voice-only. The system was built on open-source components and integrated with government soil health card data.
+
+Key challenges: variable mobile network quality in remote areas; farmers' skepticism of digital advice; and ensuring recommendations were culturally and technically appropriate. The pilot partnered with a local agricultural university for content validation and with farmer producer organizations for dissemination. Sustainability model: partial cost recovery through premium features and partnerships with input suppliers. The pilot informed a state-level scaling proposal. Lessons: human touchpoints (field agents) complemented digital delivery; voice interfaces are critical for inclusivity; and hyper-local content drives trust.

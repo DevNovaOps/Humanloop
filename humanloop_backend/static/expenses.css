@@ -1,0 +1,123 @@
+/* ═══════════════════════════════════════════
+   EXPENSES PAGE — HumanLoop Theme
+   ═══════════════════════════════════════════ */
+
+.expenses-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.budget-remaining-card {
+    padding: 1rem 1.5rem;
+    text-align: right;
+    background: linear-gradient(135deg, rgba(13, 148, 136, 0.06), rgba(26, 86, 219, 0.06));
+    border-color: rgba(13, 148, 136, 0.15);
+}
+
+.budget-remaining-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--hl-teal);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.budget-remaining-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--hl-teal);
+}
+
+.expenses-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-surface-hover);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.expense-item:hover {
+    border-color: var(--hl-blue);
+}
+
+.expense-item-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.expense-item-date {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.expense-item-amount {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.expense-delete-btn {
+    color: var(--danger);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.expense-delete-btn:hover {
+    transform: scale(1.15);
+}
+
+.back-link {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.back-link:hover {
+    color: var(--hl-blue);
+}
+
+@media (max-width: 768px) {
+    .expenses-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .expenses-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .budget-remaining-card {
+        text-align: left;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .budget-remaining-value {
+        font-size: 1.25rem;
+    }
+
+    .expense-item {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+}

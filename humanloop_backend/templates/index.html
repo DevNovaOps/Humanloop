@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HumanLoop - Community Impact</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'index.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}"></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'index' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#impact">Impact</a>
+                <a href="#partners">Partners</a>
+            </div>
+
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light Mode"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark Mode"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <a href="{% url 'login' %}" class="btn btn-secondary">Log in</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-pill">✨ TRUSTED BY 120+ INNOVATIVE NGOs</div>
+            <h1>Data-Driven Community Impact <br><span class="text-gradient-primary">Starts
+                    With Better Planning</span></h1>
+            <p class="hero-description">
+                HumanLoop transforms how NSS units and NGOs execute social initiatives.
+                Plan pilots, track budgets, and measure real-world impact—all in one unified platform.
+            </p>
+            <div class="hero-actions">
+                <a href="{% url 'register' %}" class="btn btn-primary btn-hero-lg">Start
+                    Your Pilot</a>
+                <a href="#how-it-works" class="btn btn-secondary btn-hero-lg">Watch
+                    Demo</a>
+            </div>
+
+            <div class="hero-stats-row">
+                <div class="stat-box">
+                    <strong>1,400+</strong>
+                    <span>Pilots Launched</span>
+                </div>
+                <div class="stat-box">
+                    <strong class="text-accent">98%</strong>
+                    <span>Member Retention</span>
+                </div>
+                <div class="stat-box">
+                    <strong class="text-brand-orange">$2.4M</strong>
+                    <span>Social Value Created</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section id="features" class="section-white">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Everything you need to scale impact</h2>
+                <p>From idea to execution, we cover the entire lifecycle of a social pilot.</p>
+            </div>
+
+            <div class="feature-grid">
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=400&q=80"
+                        alt="Planning" class="feature-img">
+                    <h3>🤖 AI-Powered Planning</h3>
+                    <p class="feature-text">Stop guessing resources. Our AI suggests budgets, member counts, and
+                        checklists based on 50k+ successful events.</p>
+                </div>
+
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80"
+                        alt="Execution" class="feature-img">
+                    <h3>⚡ Real-Time Execution</h3>
+                    <p class="feature-text">Track attendance, distribute materials, and manage risks live from the
+                        field with our mobile-first pilot dashboard.</p>
+                </div>
+
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80"
+                        alt="Analytics" class="feature-img">
+                    <h3>📊 Impact Analytics</h3>
+                    <p class="feature-text">Prove your worth to donors. Generate professional impact reports with
+                        automated beneficiary feedback and sentiment analysis.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impact Section -->
+    <section id="impact" class="section-impact">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Real Stories, Real Change</h2>
+                <p>See how communities are transforming with HumanLoop.</p>
+            </div>
+
+            <div class="impact-grid">
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div class="impact-card-body">
+                        <div class="impact-star-container">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"HumanLoop helped us organize our beach
+                            cleanup drive with zero chaos. The budget planning tool saved us ₹15,000!"</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">RD</div>
+                            <div>
+                                <strong class="author-name">Rahul Dave</strong>
+                                <span class="author-role">NSS President, Mumbai</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div class="impact-card-body">
+                        <div class="impact-star-container">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"The feedback loop is a game changer. We
+                            instantly knew what beneficiaries needed for the next health camp."</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">AS</div>
+                            <div>
+                                <strong class="author-name">Anjali Singh</strong>
+                                <span class="author-role">NGO Project Lead</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card impact-metric-card">
+                    <h3 class="metric-number-lg">50k+</h3>
+                    <p class="metric-label-lg">Beneficiaries Impacted</p>
+                    <div class="metric-divider-lg">
+                        <h3 class="metric-number-lg">120+</h3>
+                        <p class="metric-label-lg">Partner Organizations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partners Section -->
+    <section id="partners" class="section-white">
+        <div class="container">
+            <div class="partners-header">
+                <h2 class="section-title">Trusted by Community Leaders</h2>
+                <p>Collaborating with top institutions and NGOs to drive change.</p>
+            </div>
+
+            <div class="partner-logos">
+                <div class="partner-item"><i class="fa-solid fa-building-columns"></i> <span>NSS India</span></div>
+                <div class="partner-item"><i class="fa-solid fa-hand-holding-heart"></i> <span>CareNGO</span></div>
+                <div class="partner-item"><i class="fa-solid fa-earth-americas"></i> <span>GreenEarth</span></div>
+                <div class="partner-item"><i class="fa-solid fa-graduation-cap"></i> <span>UniConnect</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="cta-title">Ready to upgrade your social initiatives?</h2>
+            <p class="cta-description">
+                Join over 5,000 student leaders and NGO managers making a measurable difference today.
+            </p>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-white-primary">Get Started for Free</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid-wrapper"
+                style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2rem;">
+                <div style="max-width: 300px;">
+                    <div class="brand footer-brand">
+                        <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            style="height: 28px; width: 28px;">
+                            <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45"
+                                class="logo-stroke-blue" stroke-width="10" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                            <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                                stroke-linecap="round" />
+                            <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                        </svg>
+                        <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+                    </div>
+                    <p class="footer-description">Empowering communities to plan, pilot, and prove social impact through
+                        data-driven tools.</p>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Product</h4>
+                    <ul class="footer-list">
+                        <li class="footer-item"><a href="{% url 'dashboard' %}">Planning Tool</a></li>
+                        <li class="footer-item"><a href="{% url 'dashboard' %}">Impact Analytics</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Company</h4>
+                    <ul class="footer-list">
+                        <li class="footer-item"><a href="{% url 'about' %}">About Us</a></li>
+                        <li class="footer-item"><a href="{% url 'partners' %}">Partner NGOs</a></li>
+                        <li class="footer-item"><a href="{% url 'contact' %}">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                &copy; 2026 HumanLoop Inc. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+
+    <script>
+        // Django-injected user data
+        window.__USER__ = {{ user_json|safe }};
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,83 @@
+/* ═══════════════════════════════════════════
+   403 ACCESS DENIED — HumanLoop Theme
+   ═══════════════════════════════════════════ */
+
+.access-denied-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.access-denied-card {
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    padding: 3rem 2.5rem;
+}
+
+.denied-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25);
+    animation: deniedPulse 2s ease-in-out infinite;
+}
+
+@keyframes deniedPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25);
+    }
+
+    50% {
+        box-shadow: 0 8px 32px rgba(239, 68, 68, 0.4);
+    }
+}
+
+.access-denied-card h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #ef4444;
+    margin-bottom: 0.5rem;
+}
+
+.denied-subtitle {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.denied-detail {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.denied-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+    .access-denied-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .denied-actions {
+        flex-direction: column;
+    }
+}

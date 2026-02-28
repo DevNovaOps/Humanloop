@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="{{ current_language|default:'en' }}" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ translations.my_programs|default:"My Programs" }} - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        window.__USER__ = {{ user_json|safe }};
+        window.__TRANSLATIONS__ = {{ translations_json|safe }};
+        window.__LANG__ = "{{ current_language|default:'en' }}";
+    </script>
+    <script defer src="{% static 'script.js' %}"></script>
+</head>
+
+<body class="dashboard-body">
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'dashboard_beneficiary' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="nav-links"></div>
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <div class="nav-user-profile">
+                    <span class="text-medium-sm">{{ user.name|default:"Beneficiary" }}</span>
+                    <div class="avatar-sm"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-section-title" id="t-my-space">{{ translations.my_space|default:"My Space" }}</div>
+            <nav class="sidebar-nav">
+                <!-- Dynamic sidebar rendered by script.js -->
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="dashboard-page-header">
+                <div>
+                    <h1><i class="fa-solid fa-user-check" style="color:#ea580c;margin-right:0.5rem;"></i><span
+                            id="t-my-programs">{{ translations.my_programs|default:"My Programs" }}</span>
+                    </h1>
+                    <p id="t-track-programs">{{ translations.track_programs|default:"Track your enrolled programs and achievements." }}</p>
+                </div>
+            </div>
+
+            <!-- Personal Impact Stats -->
+            <div class="feature-grid dashboard-metrics-grid">
+                <div class="card metric-card">
+                    <div class="metric-label">{{ translations.enrolled_programs|default:"Programs Enrolled" }}</div>
+                    <div class="metric-value-lg" id="bene-programs">{{ program_count|default:"0" }}</div>
+                    <div class="metric-subtext"><i class="fa-solid fa-book-open" style="color:#1A56DB;"></i></div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">{{ translations.feedback_given|default:"Feedback Given" }}</div>
+                    <div class="metric-value-lg" id="bene-feedback-count">{{ feedback_count|default:"0" }}</div>
+                    <div class="metric-subtext"><i class="fa-solid fa-star" style="color:#eab308;"></i></div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">{{ translations.certificates|default:"Certificates" }}</div>
+                    <div class="metric-value-lg" id="bene-certs-count">{{ certificate_count|default:"0" }}</div>
+                    <div class="metric-subtext"><i class="fa-solid fa-certificate" style="color:#0D9488;"></i></div>
+                </div>
+            </div>
+
+
+            <!-- Feedback & Certificates Grid -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+                <!-- My Feedback -->
+                <div class="card" style="padding:1.5rem;">
+                    <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-star"
+                            style="margin-right:0.5rem;color:#eab308;"></i>{{ translations.my_feedback|default:"My Feedback" }}</h3>
+                    <div id="beneficiary-feedback-list">
+                        {% if has_past_feedback %}
+                            {% for fb in past_feedback %}
+                            <div style="padding:0.75rem;border:1px solid var(--border-color);border-radius:10px;margin-bottom:0.5rem;background:var(--bg-surface);">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem;">
+                                    <span style="font-weight:600;color:var(--text-primary);font-size:0.85rem;">{{ fb.pilot.title|default:"General" }}</span>
+                                    <span style="font-size:0.75rem;color:var(--text-muted);">{{ fb.created_at|timesince }} {{ translations.ago|default:"ago" }}</span>
+                                </div>
+                                <div style="margin-bottom:0.3rem;">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= fb.rating %}
+                                            <i class="fa-solid fa-star" style="color:#eab308;font-size:0.7rem;"></i>
+                                        {% else %}
+                                            <i class="fa-regular fa-star" style="opacity:0.3;font-size:0.7rem;"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% if fb.message %}
+                                <p style="color:var(--text-secondary);font-size:0.8rem;margin:0;line-height:1.4;">{{ fb.message|truncatechars:100 }}</p>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                        <p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:1rem 0;">
+                            <i class="fa-solid fa-pen-to-square" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:0.5rem;"></i>
+                            {{ translations.no_feedback_yet|default:"No feedback submitted yet." }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'feedback' %}" class="btn btn-secondary"
+                        style="width:100%;display:block;text-align:center;margin-top:0.75rem;">{{ translations.write_feedback|default:"Write New Feedback" }}</a>
+                </div>
+
+                <!-- Certificates -->
+                <div class="card" style="padding:1.5rem;">
+                    <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-certificate"
+                            style="margin-right:0.5rem;color:#0D9488;"></i>{{ translations.certificates|default:"Certificates" }}</h3>
+                    <div id="beneficiary-certificates">
+                        {% if certificates and certificate_count > 0 %}
+                            {% for cert in certificates %}
+                            <div style="padding:0.75rem;border:1px solid var(--border-color);border-radius:10px;margin-bottom:0.5rem;background:var(--bg-surface);">
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <div>
+                                        <div style="font-weight:600;color:var(--text-primary);font-size:0.85rem;">{{ cert.pilot.title }}</div>
+                                        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.15rem;">
+                                            #{{ cert.certificate_number }} · {{ cert.issued_at|date:"M d, Y" }}
+                                        </div>
+                                    </div>
+                                    <a href="/api/certificates/{{ cert.id }}/pdf/" target="_blank"
+                                       style="background:linear-gradient(135deg,#1A56DB,#0D9488);color:#fff;padding:0.35rem 0.75rem;border-radius:8px;font-size:0.72rem;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:0.3rem;">
+                                        <i class="fa-solid fa-download"></i> {{ translations.download|default:"Download" }}
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                        <p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:1rem 0;">
+                            <i class="fa-solid fa-certificate" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:0.5rem;"></i>
+                            {{ translations.no_certs_yet|default:"Certificates will appear here after completing programs." }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <style>
+        @media (max-width: 768px) {
+            div[style*="grid-template-columns:1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+
+    <script>
+    </script>
+</body>
+
+</html>

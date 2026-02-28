@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - HumanLoop</title>
+    <meta name="description" content="HumanLoop Privacy Policy - Learn how we collect, use, and protect your data.">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="{% static 'script.js' %}"></script>
+    <style>
+        .legal-page { max-width: 860px; margin: 2rem auto; padding: 0 1.5rem 3rem; }
+        .legal-hero {
+            text-align: center; padding: 2.5rem 2rem;
+            background: linear-gradient(135deg, rgba(26,86,219,0.08), rgba(13,148,136,0.06));
+            border-radius: 16px; margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+        .legal-hero i { font-size: 2.5rem; color: #1A56DB; margin-bottom: 0.75rem; display: block; }
+        .legal-hero h1 { font-size: 2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem; }
+        .legal-hero p { color: var(--text-muted); font-size: 0.9rem; }
+        .legal-card {
+            background: var(--bg-surface); border: 1px solid var(--border-color);
+            border-radius: 14px; padding: 2rem; margin-bottom: 1.25rem;
+            transition: box-shadow 0.2s;
+        }
+        .legal-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
+        .legal-card h2 {
+            font-size: 1.15rem; font-weight: 700; color: var(--text-primary);
+            margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .legal-card h2 i { color: #1A56DB; font-size: 1rem; }
+        .legal-card p, .legal-card li {
+            font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7;
+        }
+        .legal-card ul { padding-left: 1.5rem; margin-top: 0.5rem; }
+        .legal-card li { margin-bottom: 0.4rem; }
+        .legal-back {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            color: #1A56DB; font-weight: 600; font-size: 0.9rem;
+            text-decoration: none; margin-bottom: 1.5rem;
+            transition: gap 0.2s;
+        }
+        .legal-back:hover { gap: 0.6rem; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'dashboard' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 38V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="38" r="5" class="logo-dot-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System"><i class="fa-solid fa-display"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="legal-page">
+        <a href="{% url 'settings' %}" class="legal-back"><i class="fa-solid fa-arrow-left"></i> Back to Settings</a>
+
+        <div class="legal-hero">
+            <i class="fa-solid fa-file-shield"></i>
+            <h1>Privacy Policy</h1>
+            <p>Last updated: February 26, 2026</p>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-info-circle"></i> Introduction</h2>
+            <p>HumanLoop ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Social Innovation Platform. By using HumanLoop, you consent to the data practices described in this policy.</p>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-database"></i> Information We Collect</h2>
+            <p>We collect the following categories of personal information:</p>
+            <ul>
+                <li><strong>Account Information:</strong> Name, email address, mobile number, organization name, role, and date of birth provided during registration.</li>
+                <li><strong>Profile Data:</strong> Language preferences, profile settings, and notification preferences.</li>
+                <li><strong>Usage Data:</strong> Log data, pilot/program participation details, feedback submissions, expense records, and activity logs.</li>
+                <li><strong>Device Data:</strong> Browser type, IP address, and device identifiers for security and analytics purposes.</li>
+                <li><strong>Cookies:</strong> Essential session cookies required for authentication. See our <a href="{% url 'cookie_policy' %}">Cookie Policy</a> for details.</li>
+            </ul>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-gears"></i> How We Use Your Information</h2>
+            <p>Your information is used for the following purposes:</p>
+            <ul>
+                <li>To provide and maintain the HumanLoop platform services</li>
+                <li>To authenticate users and manage session security</li>
+                <li>To connect beneficiaries with relevant social innovation programs</li>
+                <li>To generate AI-powered insights and recommendations for program improvement</li>
+                <li>To issue certificates upon program completion</li>
+                <li>To communicate platform updates, notifications, and service-related information</li>
+                <li>To comply with legal obligations and enforce our policies</li>
+            </ul>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-share-nodes"></i> Data Sharing</h2>
+            <p>We do not sell your personal data to third parties. Your information may be shared in the following limited cases:</p>
+            <ul>
+                <li><strong>With NGOs:</strong> If you are enrolled in a pilot program, the assigned NGO may see your enrollment details to facilitate program delivery.</li>
+                <li><strong>With Administrators:</strong> Platform administrators can access user information for platform management and support.</li>
+                <li><strong>Legal Requirements:</strong> We may disclose information if required by law, regulation, or legal process.</li>
+                <li><strong>Service Providers:</strong> We may use third-party services for analytics and infrastructure, all bound by confidentiality agreements.</li>
+            </ul>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-shield-halved"></i> Data Security</h2>
+            <p>We implement industry-standard security measures to protect your data, including:</p>
+            <ul>
+                <li>Encrypted password storage using Django's PBKDF2 hashing</li>
+                <li>CSRF protection on all form submissions</li>
+                <li>Session-based authentication with secure cookie settings</li>
+                <li>Regular security audits and access logging</li>
+                <li>Role-based access control (RBAC) to restrict data visibility</li>
+            </ul>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-user-lock"></i> Your Rights</h2>
+            <p>You have the following rights regarding your personal data:</p>
+            <ul>
+                <li><strong>Access:</strong> You can download all your data at any time from Settings → Privacy → Download My Data.</li>
+                <li><strong>Correction:</strong> You can update your profile information from the Settings page.</li>
+                <li><strong>Deletion:</strong> You can request deletion of your account from Settings → Security → Danger Zone.</li>
+                <li><strong>Data Portability:</strong> Your data is available for download in a standard ZIP format.</li>
+                <li><strong>Withdraw Consent:</strong> You can opt out of analytics and optional data sharing from Privacy settings.</li>
+            </ul>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-clock-rotate-left"></i> Data Retention</h2>
+            <p>We retain your personal data for as long as your account is active or as needed to provide services. Upon account deletion, personal data is permanently removed within 30 days. Anonymized usage statistics may be retained for platform improvement.</p>
+        </div>
+
+        <div class="legal-card">
+            <h2><i class="fa-solid fa-envelope"></i> Contact Us</h2>
+            <p>If you have questions or concerns about this Privacy Policy or our data practices, please contact us at:</p>
+            <p style="margin-top:0.5rem;"><strong>Email:</strong> privacy@humanloop.org<br>
+            <strong>Address:</strong> HumanLoop Social Innovation Platform, India</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="{{ current_language|default:'en' }}" data-theme="system">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ translations.write_feedback_page|default:"Write Feedback" }} - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'feedback.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Inject translations BEFORE deferred script.js reads them
+        window.__USER__ = {{ user_json|safe }};
+        window.__T__ = {{ translations_json|safe }};
+        if (window.__USER__ && window.__USER__.role === 'beneficiary') {
+            window.__TRANSLATIONS__ = window.__T__;
+        }
+    </script>
+    <script defer src="{% static 'script.js' %}"></script>
+</head>
+<body class="dashboard-body">
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'dashboard_beneficiary' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round"/>
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10" stroke-linecap="round"/>
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal"/>
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="nav-links"></div>
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i class="fa-solid fa-desktop"></i></button>
+                </div>
+                <div class="nav-user-profile">
+                    <span class="text-medium-sm">{{ user.name|default:"Beneficiary" }}</span>
+                    <div class="avatar-sm"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-section-title">{{ translations.my_programs|default:"My Space" }}</div>
+            <nav class="sidebar-nav"><!-- Dynamic sidebar --></nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="dashboard-page-header">
+                <div>
+                    <h1><i class="fa-solid fa-pen-to-square" style="color:#eab308;margin-right:0.5rem;"></i>{{ translations.write_feedback_page|default:"Write Feedback" }}</h1>
+                    <p>{{ translations.share_experience|default:"Share your experience and help us improve our programs." }}</p>
+                </div>
+                <a href="{% url 'dashboard_beneficiary' %}" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left icon-margin-right"></i>{{ translations.back_to_dashboard|default:"Back to Dashboard" }}
+                </a>
+            </div>
+
+            <div class="feedback-form-wrapper">
+                <div class="card feedback-card">
+                    <!-- Step Indicator -->
+                    <div class="feedback-steps">
+                        <div class="feedback-step active" data-step="1">
+                            <div class="step-number">1</div>
+                            <span>{{ translations.select_program|default:"Select Program" }}</span>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="feedback-step" data-step="2">
+                            <div class="step-number">2</div>
+                            <span>{{ translations.rate_review|default:"Rate & Review" }}</span>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="feedback-step" data-step="3">
+                            <div class="step-number">3</div>
+                            <span>{{ translations.submit|default:"Submit" }}</span>
+                        </div>
+                    </div>
+
+                    <form id="feedback-form">
+                        <!-- Step 1: Select Program -->
+                        <div class="feedback-section step-content active" id="step-1">
+                            <h3 class="feedback-section-title"><i class="fa-solid fa-book-open"></i> {{ translations.choose_program|default:"Choose a Program" }}</h3>
+                            <p class="feedback-section-desc">{{ translations.choose_program_desc|default:"Select the program you'd like to give feedback for." }}</p>
+
+                            <div class="program-select-grid">
+                                {% if enrollments %}
+                                    {% for enrollment in enrollments %}
+                                    <label class="program-option">
+                                        <input type="radio" name="program" value="{{ enrollment.pilot.id }}" data-title="{{ enrollment.pilot.title }}" {% if forloop.first %}required{% endif %}>
+                                        <div class="program-option-card">
+                                            <div class="program-option-icon" style="background:linear-gradient(135deg,
+                                                {% if enrollment.pilot.status == 'active' %}#1A56DB,#3b82f6
+                                                {% elif enrollment.pilot.status == 'completed' %}#0D9488,#14b8a6
+                                                {% else %}#6B7280,#9ca3af{% endif %});">
+                                                <i class="fa-solid fa-{% if 'health' in enrollment.pilot.title|lower or 'camp' in enrollment.pilot.title|lower %}heart-pulse{% elif 'edu' in enrollment.pilot.title|lower or 'school' in enrollment.pilot.title|lower %}graduation-cap{% elif 'tree' in enrollment.pilot.title|lower or 'env' in enrollment.pilot.title|lower %}tree{% elif 'skill' in enrollment.pilot.title|lower or 'train' in enrollment.pilot.title|lower %}tools{% elif 'women' in enrollment.pilot.title|lower %}venus{% elif 'child' in enrollment.pilot.title|lower %}child{% else %}star{% endif %}"></i>
+                                            </div>
+                                            <div class="program-option-info">
+                                                <div class="program-option-name">{{ enrollment.pilot.title }}</div>
+                                                <div class="program-option-meta">
+                                                    {{ enrollment.pilot.status|capfirst }} · {{ enrollment.sessions_attended }} {{ translations.sessions|default:"sessions" }} attended
+                                                </div>
+                                            </div>
+                                            <div class="program-option-check"><i class="fa-solid fa-circle-check"></i></div>
+                                        </div>
+                                    </label>
+                                    {% endfor %}
+                                {% else %}
+                                    <div style="text-align:center;padding:2rem;color:var(--text-muted);">
+                                        <i class="fa-solid fa-book-open" style="font-size:2.5rem;opacity:0.3;display:block;margin-bottom:0.75rem;"></i>
+                                        {{ translations.no_programs_enrolled|default:"You have no enrolled programs to give feedback for." }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Category selector — card style like programs -->
+                            <div style="margin-top:1.5rem;">
+                                <h3 class="feedback-section-title">
+                                    <i class="fa-solid fa-tag" style="color:#1A56DB;"></i> {{ translations.category|default:"Category" }}
+                                </h3>
+                                <p class="feedback-section-desc">{{ translations.select_category|default:"Select a category" }}</p>
+                                <div class="program-select-grid">
+                                    <label class="program-option">
+                                        <input type="radio" name="category" value="education">
+                                        <div class="program-option-card">
+                                            <div class="program-option-icon" style="background:linear-gradient(135deg,#ea580c,#f97316);"><i class="fa-solid fa-graduation-cap"></i></div>
+                                            <div class="program-option-info"><div class="program-option-name">{{ translations.cat_education|default:"Education" }}</div></div>
+                                            <div class="program-option-check"><i class="fa-solid fa-circle-check"></i></div>
+                                        </div>
+                                    </label>
+                                    <label class="program-option">
+                                        <input type="radio" name="category" value="health">
+                                        <div class="program-option-card">
+                                            <div class="program-option-icon" style="background:linear-gradient(135deg,#0D9488,#14b8a6);"><i class="fa-solid fa-heart-pulse"></i></div>
+                                            <div class="program-option-info"><div class="program-option-name">{{ translations.cat_health|default:"Healthcare" }}</div></div>
+                                            <div class="program-option-check"><i class="fa-solid fa-circle-check"></i></div>
+                                        </div>
+                                    </label>
+                                    <label class="program-option">
+                                        <input type="radio" name="category" value="environment">
+                                        <div class="program-option-card">
+                                            <div class="program-option-icon" style="background:linear-gradient(135deg,#16a34a,#4ade80);"><i class="fa-solid fa-tree"></i></div>
+                                            <div class="program-option-info"><div class="program-option-name">{{ translations.cat_environment|default:"Environment" }}</div></div>
+                                            <div class="program-option-check"><i class="fa-solid fa-circle-check"></i></div>
+                                        </div>
+                                    </label>
+                                    <label class="program-option">
+                                        <input type="radio" name="category" value="skill_training">
+                                        <div class="program-option-card">
+                                            <div class="program-option-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);"><i class="fa-solid fa-tools"></i></div>
+                                            <div class="program-option-info"><div class="program-option-name">{{ translations.cat_skill_training|default:"Skill Training" }}</div></div>
+                                            <div class="program-option-check"><i class="fa-solid fa-circle-check"></i></div>
+                                        </div>
+                                    </label>
+                                    <label class="program-option">
+                                        <input type="radio" name="category" value="women_empowerment">
+                                        <div class="program-option-card">
+                                            <div class="program-option-icon" style="background:linear-gradient(135deg,#db2777,#f472b6);"><i class="fa-solid fa-venus"></i></div>
+                                            <div class="program-option-info"><div class="program-option-name">{{ translations.cat_women_empowerment|default:"Women Empowerment" }}</div></div>
+                                            <div class="program-option-check"><i class="fa-solid fa-circle-check"></i></div>
+                                        </div>
+                                    </label>
+                                    <label class="program-option">
+                                        <input type="radio" name="category" value="child_welfare">
+                                        <div class="program-option-card">
+                                            <div class="program-option-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);"><i class="fa-solid fa-child"></i></div>
+                                            <div class="program-option-info"><div class="program-option-name">{{ translations.cat_child_welfare|default:"Child Welfare" }}</div></div>
+                                            <div class="program-option-check"><i class="fa-solid fa-circle-check"></i></div>
+                                        </div>
+                                    </label>
+                                    <label class="program-option">
+                                        <input type="radio" name="category" value="livelihood">
+                                        <div class="program-option-card">
+                                            <div class="program-option-icon" style="background:linear-gradient(135deg,#0284c7,#38bdf8);"><i class="fa-solid fa-briefcase"></i></div>
+                                            <div class="program-option-info"><div class="program-option-name">{{ translations.cat_livelihood|default:"Livelihood" }}</div></div>
+                                            <div class="program-option-check"><i class="fa-solid fa-circle-check"></i></div>
+                                        </div>
+                                    </label>
+                                    <label class="program-option">
+                                        <input type="radio" name="category" value="digital_literacy">
+                                        <div class="program-option-card">
+                                            <div class="program-option-icon" style="background:linear-gradient(135deg,#4f46e5,#818cf8);"><i class="fa-solid fa-laptop-code"></i></div>
+                                            <div class="program-option-info"><div class="program-option-name">{{ translations.cat_digital_literacy|default:"Digital Literacy" }}</div></div>
+                                            <div class="program-option-check"><i class="fa-solid fa-circle-check"></i></div>
+                                        </div>
+                                    </label>
+                                    <label class="program-option">
+                                        <input type="radio" name="category" value="sanitation">
+                                        <div class="program-option-card">
+                                            <div class="program-option-icon" style="background:linear-gradient(135deg,#059669,#34d399);"><i class="fa-solid fa-hand-sparkles"></i></div>
+                                            <div class="program-option-info"><div class="program-option-name">{{ translations.cat_sanitation|default:"Sanitation & Hygiene" }}</div></div>
+                                            <div class="program-option-check"><i class="fa-solid fa-circle-check"></i></div>
+                                        </div>
+                                    </label>
+                                    <label class="program-option">
+                                        <input type="radio" name="category" value="nutrition">
+                                        <div class="program-option-card">
+                                            <div class="program-option-icon" style="background:linear-gradient(135deg,#d97706,#fcd34d);"><i class="fa-solid fa-apple-whole"></i></div>
+                                            <div class="program-option-info"><div class="program-option-name">{{ translations.cat_nutrition|default:"Nutrition & Food" }}</div></div>
+                                            <div class="program-option-check"><i class="fa-solid fa-circle-check"></i></div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="feedback-nav">
+                                <div></div>
+                                <button type="button" class="btn btn-primary btn-next" onclick="goToStep(2)">
+                                    {{ translations.next|default:"Next" }} <i class="fa-solid fa-arrow-right" style="margin-left:0.4rem;"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Rate & Review -->
+                        <div class="feedback-section step-content" id="step-2">
+                            <h3 class="feedback-section-title"><i class="fa-solid fa-star"></i> {{ translations.rate_experience|default:"Rate Your Experience" }}</h3>
+                            <p class="feedback-section-desc">{{ translations.rate_experience_desc|default:"How would you rate this program overall?" }}</p>
+
+                            <div class="star-rating-container">
+                                <div class="star-rating" id="star-rating">
+                                    <i class="fa-solid fa-star" data-rating="1"></i>
+                                    <i class="fa-solid fa-star" data-rating="2"></i>
+                                    <i class="fa-solid fa-star" data-rating="3"></i>
+                                    <i class="fa-solid fa-star" data-rating="4"></i>
+                                    <i class="fa-solid fa-star" data-rating="5"></i>
+                                </div>
+                                <div class="rating-label" id="rating-label">{{ translations.click_to_rate|default:"Click to rate" }}</div>
+                            </div>
+
+                            <!-- Tags — 12 categories -->
+                            <div class="feedback-tags">
+                                <span class="feedback-tag" data-tag="{{ translations.tag_well_organized|default:'Well Organized' }}">👏 {{ translations.tag_well_organized|default:"Well Organized" }}</span>
+                                <span class="feedback-tag" data-tag="{{ translations.tag_helpful|default:'Helpful' }}">💡 {{ translations.tag_helpful|default:"Helpful" }}</span>
+                                <span class="feedback-tag" data-tag="{{ translations.tag_great_mentor|default:'Great Mentor' }}">🌟 {{ translations.tag_great_mentor|default:"Great Mentor" }}</span>
+                                <span class="feedback-tag" data-tag="{{ translations.tag_practical_skills|default:'Practical Skills' }}">🛠️ {{ translations.tag_practical_skills|default:"Practical Skills" }}</span>
+                                <span class="feedback-tag" data-tag="{{ translations.tag_fun_engaging|default:'Fun & Engaging' }}">🎉 {{ translations.tag_fun_engaging|default:"Fun & Engaging" }}</span>
+                                <span class="feedback-tag" data-tag="{{ translations.tag_needs_improvement|default:'Needs Improvement' }}">📝 {{ translations.tag_needs_improvement|default:"Needs Improvement" }}</span>
+                                <span class="feedback-tag" data-tag="{{ translations.tag_good_resources|default:'Good Resources' }}">📚 {{ translations.tag_good_resources|default:"Good Resources" }}</span>
+                                <span class="feedback-tag" data-tag="{{ translations.tag_supportive_staff|default:'Supportive Staff' }}">🤝 {{ translations.tag_supportive_staff|default:"Supportive Staff" }}</span>
+                                <span class="feedback-tag" data-tag="{{ translations.tag_clear_communication|default:'Clear Communication' }}">📢 {{ translations.tag_clear_communication|default:"Clear Communication" }}</span>
+                                <span class="feedback-tag" data-tag="{{ translations.tag_impactful|default:'Impactful' }}">🌱 {{ translations.tag_impactful|default:"Impactful" }}</span>
+                                <span class="feedback-tag" data-tag="{{ translations.tag_inclusive|default:'Inclusive' }}">🫂 {{ translations.tag_inclusive|default:"Inclusive" }}</span>
+                                <span class="feedback-tag" data-tag="{{ translations.tag_timely|default:'Timely' }}">⏰ {{ translations.tag_timely|default:"Timely" }}</span>
+                            </div>
+
+                            <div class="feedback-textarea-wrap">
+                                <label for="feedback-text" class="feedback-label">{{ translations.your_feedback|default:"Your Feedback" }}</label>
+                                <textarea id="feedback-text" class="feedback-textarea" rows="5"
+                                    placeholder="{{ translations.feedback_placeholder|default:'Tell us about your experience... What did you enjoy? What could be improved?' }}"
+                                    maxlength="500"></textarea>
+                                <div class="char-counter"><span id="char-count">0</span>/500</div>
+                            </div>
+
+                            <div class="feedback-nav">
+                                <button type="button" class="btn btn-secondary btn-prev" onclick="goToStep(1)">
+                                    <i class="fa-solid fa-arrow-left" style="margin-right:0.4rem;"></i>{{ translations.back|default:"Back" }}
+                                </button>
+                                <button type="button" class="btn btn-primary btn-next" onclick="goToStep(3)">
+                                    {{ translations.review|default:"Review" }} <i class="fa-solid fa-arrow-right" style="margin-left:0.4rem;"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Review & Submit -->
+                        <div class="feedback-section step-content" id="step-3">
+                            <h3 class="feedback-section-title"><i class="fa-solid fa-check-circle"></i> {{ translations.review_submit|default:"Review & Submit" }}</h3>
+                            <p class="feedback-section-desc">{{ translations.check_feedback|default:"Check your feedback before submitting." }}</p>
+
+                            <div class="feedback-preview">
+                                <div class="preview-item">
+                                    <div class="preview-label">{{ translations.program|default:"Program" }}</div>
+                                    <div class="preview-value" id="preview-program">—</div>
+                                </div>
+                                <div class="preview-item">
+                                    <div class="preview-label">{{ translations.category|default:"Category" }}</div>
+                                    <div class="preview-value" id="preview-category">—</div>
+                                </div>
+                                <div class="preview-item">
+                                    <div class="preview-label">{{ translations.rating|default:"Rating" }}</div>
+                                    <div class="preview-value" id="preview-rating">—</div>
+                                </div>
+                                <div class="preview-item">
+                                    <div class="preview-label">{{ translations.tags|default:"Tags" }}</div>
+                                    <div class="preview-value" id="preview-tags">—</div>
+                                </div>
+                                <div class="preview-item">
+                                    <div class="preview-label">{{ translations.message|default:"Feedback" }}</div>
+                                    <div class="preview-value" id="preview-text">—</div>
+                                </div>
+                            </div>
+
+                            <div class="feedback-nav">
+                                <button type="button" class="btn btn-secondary btn-prev" onclick="goToStep(2)">
+                                    <i class="fa-solid fa-arrow-left" style="margin-right:0.4rem;"></i>{{ translations.edit|default:"Edit" }}
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-submit">
+                                    <i class="fa-solid fa-paper-plane" style="margin-right:0.4rem;"></i>{{ translations.submit_feedback|default:"Submit Feedback" }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Past Feedback: only shown if user has submitted feedback -->
+                {% if has_past_feedback %}
+                <div class="card feedback-history-card">
+                    <h3 class="feedback-section-title"><i class="fa-solid fa-clock-rotate-left"></i> {{ translations.past_feedback|default:"Your Past Feedback" }}</h3>
+                    <div class="past-feedback-list">
+                        {% for fb in past_feedback %}
+                        <div class="past-feedback-item">
+                            <div class="past-feedback-header">
+                                <div class="past-feedback-program">{{ fb.pilot.title|default:"General" }}</div>
+                                <div class="past-feedback-stars">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= fb.rating %}
+                                            <i class="fa-solid fa-star"></i>
+                                        {% else %}
+                                            <i class="fa-regular fa-star" style="opacity:0.3;"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% if fb.message %}<p class="past-feedback-text">{{ fb.message }}</p>{% endif %}
+                            <div class="past-feedback-meta">
+                                {% now "U" as now_ts %}
+                                {{ fb.created_at|timesince }} ago
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Success Modal -->
+            <div class="feedback-success-modal" id="success-modal">
+                <div class="success-modal-content">
+                    <div class="success-icon-wrap"><i class="fa-solid fa-circle-check"></i></div>
+                    <h2>{{ translations.thank_you|default:"Thank You! 🎉" }}</h2>
+                    <p>{{ translations.feedback_submitted|default:"Your feedback has been submitted successfully. It helps us make our programs better for everyone." }}</p>
+                    <a href="{% url 'dashboard_beneficiary' %}" class="btn btn-primary" style="width:100%;margin-top:1.5rem;">
+                        {{ translations.back_to_dashboard|default:"Back to Dashboard" }}
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Translations already injected in <head>
+        const T = window.__T__ || {};
+        const _u = window.__USER__;
+        const ratingLabels = ['', T.poor||'Poor', T.fair||'Fair', T.good||'Good', T.very_good||'Very Good', T.excellent||'Excellent'];
+
+        // --- Star Rating ---
+        let currentRating = 0;
+        const stars = document.querySelectorAll('#star-rating i');
+        const ratingLabelEl = document.getElementById('rating-label');
+
+        stars.forEach(star => {
+            star.addEventListener('mouseenter', () => {
+                const r = parseInt(star.dataset.rating);
+                highlightStars(r);
+                ratingLabelEl.textContent = ratingLabels[r];
+            });
+            star.addEventListener('click', () => {
+                currentRating = parseInt(star.dataset.rating);
+                highlightStars(currentRating);
+                ratingLabelEl.textContent = ratingLabels[currentRating];
+                ratingLabelEl.classList.add('selected');
+            });
+        });
+
+        document.getElementById('star-rating').addEventListener('mouseleave', () => {
+            highlightStars(currentRating);
+            ratingLabelEl.textContent = currentRating ? ratingLabels[currentRating] : (T.click_to_rate || 'Click to rate');
+            if (!currentRating) ratingLabelEl.classList.remove('selected');
+        });
+
+        function highlightStars(count) {
+            stars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.rating) <= count));
+        }
+
+        // --- Tags ---
+        const selectedTags = new Set();
+        document.querySelectorAll('.feedback-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                const v = tag.dataset.tag;
+                if (selectedTags.has(v)) { selectedTags.delete(v); tag.classList.remove('active'); }
+                else { selectedTags.add(v); tag.classList.add('active'); }
+            });
+        });
+
+        // --- Char counter ---
+        const textarea = document.getElementById('feedback-text');
+        const charCount = document.getElementById('char-count');
+        textarea.addEventListener('input', () => { charCount.textContent = textarea.value.length; });
+
+        // --- Step Nav ---
+        function goToStep(step) {
+            if (step === 2) {
+                const checked = document.querySelector('input[name="program"]:checked');
+                if (!checked) {
+                    alert(T.choose_program_desc || "Please select a program first.");
+                    return;
+                }
+            }
+            document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('step-' + step).classList.add('active');
+            document.querySelectorAll('.feedback-step').forEach(el => {
+                const s = parseInt(el.dataset.step);
+                el.classList.toggle('active', s === step);
+                el.classList.toggle('completed', s < step);
+            });
+            if (step === 3) {
+                const sel = document.querySelector('input[name="program"]:checked');
+                document.getElementById('preview-program').textContent = sel ? sel.dataset.title || sel.closest('label').querySelector('.program-option-name').textContent : '—';
+                const catRadio = document.querySelector('input[name="category"]:checked');
+                document.getElementById('preview-category').textContent = catRadio ? catRadio.closest('label').querySelector('.program-option-name').textContent : '—';
+                const starsHTML = Array.from({length:5}, (_,i) =>
+                    `<i class="fa-solid fa-star" style="color:${i < currentRating ? '#eab308' : 'var(--text-muted)'};opacity:${i < currentRating ? 1 : 0.3};"></i>`
+                ).join('') + ` <span style="margin-left:0.5rem;color:var(--text-secondary);">${ratingLabels[currentRating] || '—'}</span>`;
+                document.getElementById('preview-rating').innerHTML = starsHTML;
+                document.getElementById('preview-tags').textContent = selectedTags.size > 0 ? [...selectedTags].join(', ') : '—';
+                document.getElementById('preview-text').textContent = textarea.value || '—';
+            }
+        }
+
+        // --- Submit: real API call ---
+        document.getElementById('feedback-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = this.querySelector('.btn-submit');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+            const sel = document.querySelector('input[name="program"]:checked');
+            const catRadio2 = document.querySelector('input[name="category"]:checked');
+            const cat = catRadio2 ? catRadio2.value : '';
+
+            try {
+                const res = await fetch('/api/feedback/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pilot_id: sel ? parseInt(sel.value) : null,
+                        rating: currentRating || 5,
+                        message: textarea.value,
+                        tags: [...selectedTags],
+                        category: cat,
+                    })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    document.getElementById('success-modal').classList.add('visible');
+                } else {
+                    alert(d.error || 'Submission failed.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane" style="margin-right:0.4rem;"></i>' + (T.submit_feedback || 'Submit Feedback');
+                }
+            } catch(err) {
+                alert('Network error. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane" style="margin-right:0.4rem;"></i>' + (T.submit_feedback || 'Submit Feedback');
+            }
+        });
+    </script>
+</body>
+</html>

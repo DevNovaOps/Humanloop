@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="{{ current_language|default:'en' }}" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ translations.settings|default:"Settings" }} - HumanLoop</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'settings.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Inject translations BEFORE deferred script.js reads them
+        window.__USER__ = {{ user_json|safe }};
+        window.__T__ = {{ translations_json|safe }};
+        // Only beneficiaries get translated sidebar
+        if (window.__USER__ && window.__USER__.role === 'beneficiary') {
+            window.__TRANSLATIONS__ = window.__T__;
+        }
+    </script>
+    <script defer src="{% static 'script.js' %}?v=2"></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'dashboard' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+
+            <button class="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+
+            <div class="nav-links"></div>
+
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i
+                            class="fa-solid fa-desktop"></i></button>
+                </div>
+                <div class="nav-user-profile">
+                    <span class="text-medium-sm">{{ user.name|default:"User" }}</span>
+                    <div class="avatar-sm"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-section-title">{{ translations.main_menu|default:"Main Menu" }}</div>
+            <nav class="sidebar-nav"><!-- Dynamic sidebar populated by script.js --></nav>
+        </aside>
+
+        <main class="main-content">
+            <!-- Settings Modal / Overlay -->
+            <div class="settings-modal-overlay" id="settings-overlay">
+                <div class="settings-modal">
+                    <!-- Close Button -->
+                    <button class="settings-modal-close" id="settings-close-btn" onclick="goBackToDashboard()" title="Close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+
+                    <!-- Settings Sidebar -->
+                    <div class="settings-sidebar">
+                        <button class="settings-nav-item active" data-tab="profile" onclick="switchTab('profile')">
+                            <i class="fa-solid fa-user"></i> {{ translations.profile|default:"Profile" }}
+                        </button>
+                        <button class="settings-nav-item" data-tab="security" onclick="switchTab('security')">
+                            <i class="fa-solid fa-shield-halved"></i> {{ translations.security|default:"Security" }}
+                        </button>
+                        <button class="settings-nav-item" data-tab="language" id="lang-nav-btn"
+                            onclick="switchTab('language')">
+                            <i class="fa-solid fa-language"></i> {{ translations.language|default:"Language" }}
+                        </button>
+                        <button class="settings-nav-item" data-tab="notifications" onclick="switchTab('notifications')">
+                            <i class="fa-solid fa-bell"></i> {{ translations.notifications|default:"Notifications" }}
+                        </button>
+                        <button class="settings-nav-item" data-tab="privacy" onclick="switchTab('privacy')">
+                            <i class="fa-solid fa-lock"></i> {{ translations.privacy|default:"Privacy" }}
+                        </button>
+                    </div>
+
+                    <!-- Settings Content Area -->
+                    <div class="settings-content">
+
+                        <!-- ═══════════ PROFILE TAB ═══════════ -->
+                        <div class="settings-panel active" id="panel-profile">
+                            <div class="settings-panel-header">{{ translations.profile|default:"Profile" }}</div>
+
+                            <!-- Profile Card with Avatar -->
+                            <div class="profile-header">
+                                <div class="profile-avatar" id="profile-avatar-initials">
+                                    {{ user.name|default:"U"|slice:":2"|upper }}
+                                    <div class="profile-avatar-edit" id="avatar-edit-btn" title="Change photo"
+                                        style="display:none;"><i class="fa-solid fa-camera"></i></div>
+                                </div>
+                                <div class="profile-header-info">
+                                    <h2 id="profile-display-name">{{ user.name|default:"" }}</h2>
+                                    <p id="profile-display-email">{{ user.email|default:"" }}</p>
+                                    <span class="profile-role" id="profile-role-badge"><i class="fa-solid fa-shield-halved"
+                                            style="margin-right:0.3rem;font-size:0.65rem;"></i>{{ user.organization|default:user.role }}</span>
+                                </div>
+                                <button class="btn btn-secondary" id="edit-profile-btn" onclick="enableProfileEdit()"><i
+                                        class="fa-solid fa-pen-to-square" style="margin-right:0.4rem;"></i>{{ translations.edit_profile|default:"Edit Profile" }}</button>
+                            </div>
+
+                            <!-- Profile Form -->
+                            <div class="settings-card">
+                                <div class="setting-section" style="padding-top:0;">
+                                    <div class="setting-section-title">{{ translations.personal_information|default:"Personal Information" }}</div>
+                                    <div class="settings-form-grid">
+                                        <div class="form-group">
+                                            <label for="first-name">{{ translations.first_name|default:"First Name" }}</label>
+                                            <input type="text" id="first-name" class="input-field profile-field"
+                                                value="{{ user.name|default:""|truncatewords:1 }}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="last-name">{{ translations.last_name|default:"Last Name" }}</label>
+                                            <input type="text" id="last-name" class="input-field profile-field"
+                                                value="" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="setting-section">
+                                    <div class="setting-section-title">{{ translations.contact_details|default:"Contact Details" }}</div>
+                                    <div class="settings-form-grid">
+                                        <div class="form-group">
+                                            <label for="email">{{ translations.email_address|default:"Email Address" }}</label>
+                                            <input type="email" id="email" class="input-field profile-field"
+                                                value="{{ user.email|default:"" }}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="mobile">{{ translations.mobile_number|default:"Mobile Number" }}</label>
+                                            <input type="tel" id="mobile" class="input-field profile-field"
+                                                value="{{ user.mobile|default:"" }}" placeholder="+91 XXXXX XXXXX" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="setting-section">
+                                    <div class="setting-section-title">{{ translations.additional_details|default:"Additional Details" }}</div>
+                                    <div class="settings-form-grid">
+                                        <div class="form-group">
+                                            <label for="dob">{{ translations.date_of_birth|default:"Date of Birth" }}</label>
+                                            <input type="date" id="dob" class="input-field profile-field"
+                                                value="{{ user.dob|default:"" }}" readonly>
+                                        </div>
+                                        <div class="form-group" id="field-organization">
+                                            <label for="organization">{{ translations.organization|default:"Organization" }}</label>
+                                            <input type="text" id="organization" class="input-field profile-field"
+                                                value="{{ user.organization|default:"" }}" readonly>
+                                        </div>
+                                        <div class="form-group" id="field-location" style="display:none;">
+                                            <label for="user-location">{{ translations.location|default:"Location" }}</label>
+                                            <input type="text" id="user-location" class="input-field profile-field"
+                                                value="" placeholder="Your city or village" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="settings-actions" id="profile-actions" style="display:none;">
+                                    <button class="btn btn-secondary" type="button"
+                                        onclick="cancelProfileEdit()">{{ translations.cancel|default:"Cancel" }}</button>
+                                    <button class="btn btn-primary" type="button" onclick="saveProfile()"><i
+                                            class="fa-solid fa-check" style="margin-right:0.4rem;"></i>{{ translations.save_profile|default:"Save Profile" }}</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ═══════════ SECURITY TAB ═══════════ -->
+                        <div class="settings-panel" id="panel-security">
+                            <div class="settings-panel-header">{{ translations.security|default:"Security" }}</div>
+
+                            <div class="settings-card">
+                                <div class="setting-section" style="padding-top:0;">
+                                    <div class="setting-section-title">{{ translations.change_password|default:"Change Password" }}</div>
+                                    <div class="form-group">
+                                        <label for="current-password">{{ translations.current_password|default:"Current Password" }}</label>
+                                        <div class="password-field-wrap">
+                                            <input type="password" id="current-password" class="input-field"
+                                                placeholder="{{ translations.enter_current_password|default:"Enter current password" }}">
+                                            <button type="button" class="password-toggle-btn"
+                                                onclick="togglePassword('current-password', this)"><i
+                                                    class="fa-solid fa-eye"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="settings-form-grid">
+                                        <div class="form-group">
+                                            <label for="new-password">{{ translations.new_password|default:"New Password" }}</label>
+                                            <div class="password-field-wrap">
+                                                <input type="password" id="new-password" class="input-field"
+                                                    placeholder="{{ translations.min_8_characters|default:"Min 8 characters" }}">
+                                                <button type="button" class="password-toggle-btn"
+                                                    onclick="togglePassword('new-password', this)"><i
+                                                        class="fa-solid fa-eye"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="confirm-password">{{ translations.confirm_new_password|default:"Confirm New Password" }}</label>
+                                            <div class="password-field-wrap">
+                                                <input type="password" id="confirm-password" class="input-field"
+                                                    placeholder="{{ translations.reenter_new_password|default:"Re-enter new password" }}">
+                                                <button type="button" class="password-toggle-btn"
+                                                    onclick="togglePassword('confirm-password', this)"><i
+                                                        class="fa-solid fa-eye"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="settings-actions" style="padding-top:0.5rem;">
+                                        <button class="btn btn-primary" type="button" id="change-password-btn"><i class="fa-solid fa-key"
+                                                style="margin-right:0.4rem;"></i>{{ translations.update_password|default:"Update Password" }}</button>
+                                    </div>
+                                </div>
+
+                                <div class="setting-section" id="twofa-section">
+                                    <div class="setting-section-title">{{ translations.two_factor_auth|default:"Two-Factor Authentication" }}</div>
+
+                                    <!-- 2FA Status: Not Enabled -->
+                                    <div id="twofa-disabled-state">
+                                        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.2);border-radius:10px;margin-bottom:1rem;">
+                                            <i class="fa-solid fa-shield-halved" style="color:#d97706;font-size:1.2rem;"></i>
+                                            <div>
+                                                <div style="font-weight:600;font-size:0.85rem;color:var(--text-primary);">2FA is not enabled</div>
+                                                <div style="font-size:0.78rem;color:var(--text-secondary);">Add an extra layer of security using an authenticator app like Google Authenticator or Authy.</div>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-primary" type="button" id="twofa-setup-btn" style="font-size:0.85rem;">
+                                            <i class="fa-solid fa-qrcode" style="margin-right:0.4rem;"></i>Set Up 2FA
+                                        </button>
+
+                                        <!-- QR Code setup area (hidden initially) -->
+                                        <div id="twofa-setup-area" style="display:none;margin-top:1rem;">
+                                            <div style="padding:1.25rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;">
+                                                <p style="font-size:0.85rem;color:var(--text-primary);font-weight:600;margin-bottom:0.75rem;">
+                                                    <i class="fa-solid fa-mobile-screen" style="margin-right:0.4rem;color:#1A56DB;"></i>
+                                                    Step 1: Scan this QR code with your authenticator app
+                                                </p>
+                                                <div style="text-align:center;padding:1rem 0;">
+                                                    <img id="twofa-qr-img" src="" alt="2FA QR Code" style="max-width:200px;border-radius:8px;border:2px solid var(--border-color);">
+                                                </div>
+                                                <p style="font-size:0.78rem;color:var(--text-muted);text-align:center;margin-bottom:0.75rem;">
+                                                    Or enter this key manually: <code id="twofa-secret-key" style="background:var(--bg-surface);padding:0.2rem 0.5rem;border-radius:4px;font-weight:700;letter-spacing:1px;"></code>
+                                                </p>
+                                                <hr style="border:none;border-top:1px solid var(--border-color);margin:1rem 0;">
+                                                <p style="font-size:0.85rem;color:var(--text-primary);font-weight:600;margin-bottom:0.5rem;">
+                                                    <i class="fa-solid fa-keyboard" style="margin-right:0.4rem;color:#0D9488;"></i>
+                                                    Step 2: Enter the 6-digit code from your app
+                                                </p>
+                                                <div style="display:flex;gap:0.75rem;align-items:center;">
+                                                    <input type="text" id="twofa-verify-code" class="input-field" maxlength="6" pattern="[0-9]*" inputmode="numeric"
+                                                        placeholder="000000" style="max-width:160px;text-align:center;font-size:1.2rem;letter-spacing:4px;font-weight:700;">
+                                                    <button class="btn btn-primary" type="button" id="twofa-confirm-btn" style="font-size:0.85rem;">
+                                                        <i class="fa-solid fa-check" style="margin-right:0.3rem;"></i>Verify & Enable
+                                                    </button>
+                                                </div>
+                                                <div id="twofa-setup-error" style="display:none;margin-top:0.5rem;font-size:0.8rem;color:#ef4444;font-weight:600;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2FA Status: Enabled -->
+                                    <div id="twofa-enabled-state" style="display:none;">
+                                        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;background:rgba(13,148,136,0.08);border:1px solid rgba(13,148,136,0.2);border-radius:10px;margin-bottom:1rem;">
+                                            <i class="fa-solid fa-shield-check" style="color:#0D9488;font-size:1.2rem;"></i>
+                                            <div>
+                                                <div style="font-weight:600;font-size:0.85rem;color:var(--text-primary);">2FA is enabled ✓</div>
+                                                <div style="font-size:0.78rem;color:var(--text-secondary);">Your account is protected with Two-Factor Authentication.</div>
+                                            </div>
+                                        </div>
+                                        <button class="btn-danger" type="button" id="twofa-disable-btn" style="font-size:0.85rem;padding:0.5rem 1rem;">
+                                            <i class="fa-solid fa-shield-xmark" style="margin-right:0.4rem;"></i>Disable 2FA
+                                        </button>
+
+                                        <!-- Disable confirmation (hidden initially) -->
+                                        <div id="twofa-disable-area" style="display:none;margin-top:1rem;">
+                                            <div style="padding:1.25rem;background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.15);border-radius:12px;">
+                                                <p style="font-size:0.85rem;color:var(--text-primary);font-weight:600;margin-bottom:0.75rem;">
+                                                    Confirm disabling 2FA
+                                                </p>
+                                                <div class="form-group" style="margin-bottom:0.75rem;">
+                                                    <label style="font-size:0.8rem;">Current Password</label>
+                                                    <input type="password" id="twofa-disable-password" class="input-field" placeholder="Your password">
+                                                </div>
+                                                <div class="form-group" style="margin-bottom:0.75rem;">
+                                                    <label style="font-size:0.8rem;">2FA Code from Authenticator</label>
+                                                    <input type="text" id="twofa-disable-code" class="input-field" maxlength="6" pattern="[0-9]*" inputmode="numeric"
+                                                        placeholder="000000" style="max-width:160px;text-align:center;font-size:1.1rem;letter-spacing:3px;font-weight:700;">
+                                                </div>
+                                                <div style="display:flex;gap:0.5rem;">
+                                                    <button class="btn-danger" type="button" id="twofa-disable-confirm-btn" style="font-size:0.82rem;">Confirm Disable</button>
+                                                    <button class="btn btn-secondary" type="button" onclick="document.getElementById('twofa-disable-area').style.display='none'" style="font-size:0.82rem;">Cancel</button>
+                                                </div>
+                                                <div id="twofa-disable-error" style="display:none;margin-top:0.5rem;font-size:0.8rem;color:#ef4444;font-weight:600;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="setting-section" style="border-bottom:none;">
+                                    <div class="setting-section-title">{{ translations.danger_zone|default:"Danger Zone" }}</div>
+                                    <div class="danger-zone">
+                                        <h4><i class="fa-solid fa-triangle-exclamation"
+                                                style="margin-right:0.4rem;"></i>{{ translations.delete_account|default:"Delete Account" }}</h4>
+                                        <p>{{ translations.delete_account_desc|default:"Once you delete your account, all data will be permanently removed. This action cannot be undone." }}</p>
+                                        <button class="btn-danger" id="delete-account-btn">{{ translations.delete_my_account|default:"Delete My Account" }}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ═══════════ LANGUAGE TAB ═══════════ -->
+                        <div class="settings-panel" id="panel-language">
+                            <div class="settings-panel-header">{{ translations.language|default:"Language" }}</div>
+
+                            <div class="settings-card">
+                                <div class="setting-section" style="padding-top:0;">
+                                    <div class="setting-section-title">{{ translations.interface_language|default:"Interface Language" }}</div>
+                                    <p class="setting-description">{{ translations.interface_language_desc|default:"Select your preferred language for the HumanLoop interface." }}</p>
+                                    <div class="language-grid">
+                                        <label class="language-option">
+                                            <input type="radio" name="language" value="en">
+                                            <div class="language-card">
+                                                <span class="language-name">English</span>
+                                                <span class="language-native">English</span>
+                                            </div>
+                                        </label>
+                                        <label class="language-option">
+                                            <input type="radio" name="language" value="hi">
+                                            <div class="language-card">
+                                                <span class="language-name">Hindi</span>
+                                                <span class="language-native">हिन्दी</span>
+                                            </div>
+                                        </label>
+                                        <label class="language-option">
+                                            <input type="radio" name="language" value="bn">
+                                            <div class="language-card">
+                                                <span class="language-name">Bengali</span>
+                                                <span class="language-native">বাংলা</span>
+                                            </div>
+                                        </label>
+                                        <label class="language-option">
+                                            <input type="radio" name="language" value="te">
+                                            <div class="language-card">
+                                                <span class="language-name">Telugu</span>
+                                                <span class="language-native">తెలుగు</span>
+                                            </div>
+                                        </label>
+                                        <label class="language-option">
+                                            <input type="radio" name="language" value="mr">
+                                            <div class="language-card">
+                                                <span class="language-name">Marathi</span>
+                                                <span class="language-native">मराठी</span>
+                                            </div>
+                                        </label>
+                                        <label class="language-option">
+                                            <input type="radio" name="language" value="ta">
+                                            <div class="language-card">
+                                                <span class="language-name">Tamil</span>
+                                                <span class="language-native">தமிழ்</span>
+                                            </div>
+                                        </label>
+                                        <label class="language-option">
+                                            <input type="radio" name="language" value="gu">
+                                            <div class="language-card">
+                                                <span class="language-name">Gujarati</span>
+                                                <span class="language-native">ગુજરાતી</span>
+                                            </div>
+                                        </label>
+                                        <label class="language-option">
+                                            <input type="radio" name="language" value="kn">
+                                            <div class="language-card">
+                                                <span class="language-name">Kannada</span>
+                                                <span class="language-native">ಕನ್ನಡ</span>
+                                            </div>
+                                        </label>
+                                        <label class="language-option">
+                                            <input type="radio" name="language" value="ml">
+                                            <div class="language-card">
+                                                <span class="language-name">Malayalam</span>
+                                                <span class="language-native">മലയാളം</span>
+                                            </div>
+                                        </label>
+                                        <label class="language-option">
+                                            <input type="radio" name="language" value="pa">
+                                            <div class="language-card">
+                                                <span class="language-name">Punjabi</span>
+                                                <span class="language-native">ਪੰਜਾਬੀ</span>
+                                            </div>
+                                        </label>
+                                        <label class="language-option">
+                                            <input type="radio" name="language" value="or">
+                                            <div class="language-card">
+                                                <span class="language-name">Odia</span>
+                                                <span class="language-native">ଓଡ଼ିଆ</span>
+                                            </div>
+                                        </label>
+                                        <label class="language-option">
+                                            <input type="radio" name="language" value="as">
+                                            <div class="language-card">
+                                                <span class="language-name">Assamese</span>
+                                                <span class="language-native">অসমীয়া</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-section" style="border-bottom:none;">
+                                    <div class="setting-section-title">{{ translations.translation|default:"Translation" }}</div>
+                                    <div class="toggle-row" style="border-bottom:none;">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.auto_translate|default:"Auto-translate content" }}</span>
+                                            <span>{{ translations.auto_translate_desc|default:"Automatically translate user-generated content to your preferred language" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ═══════════ NOTIFICATIONS TAB ═══════════ -->
+                        <div class="settings-panel" id="panel-notifications">
+                            <div class="settings-panel-header">{{ translations.notifications|default:"Notifications" }}</div>
+
+                            <div class="settings-card">
+                                <div class="setting-section" style="padding-top:0;">
+                                    <div class="setting-section-title">{{ translations.email_notifications|default:"Email Notifications" }}</div>
+                                    <!-- Innovator / NGO / Admin notifications -->
+                                    <div class="toggle-row" id="row-notif-pilot">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.pilot_completion|default:"Pilot Completion" }}</span>
+                                            <span>{{ translations.pilot_completion_desc|default:"Email me when a pilot initiative is completed" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="notif-pilot-updates" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="toggle-row" id="row-notif-budget">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.budget_alerts|default:"Budget Alerts" }}</span>
+                                            <span>{{ translations.budget_alerts_desc|default:"Notify when budget utilization exceeds 80%" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="notif-email" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="toggle-row" id="row-notif-weekly">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.weekly_report|default:"Weekly Report" }}</span>
+                                            <span>{{ translations.weekly_report_desc|default:"Receive a weekly summary of impact metrics" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="notif-weekly-digest">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="toggle-row" id="row-notif-team">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.team_activity|default:"Team Activity" }}</span>
+                                            <span>{{ translations.team_activity_desc|default:"Get notified when team members update pilots" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="notif-team-activity" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <!-- Beneficiary-only notifications -->
+                                    <div class="toggle-row" id="row-notif-program-updates" style="display:none;">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.program_updates|default:"Program Updates" }}</span>
+                                            <span>{{ translations.program_updates_desc|default:"Get notified about changes to your enrolled programs" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="notif-program-updates" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="toggle-row" id="row-notif-session-reminders" style="display:none;">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.session_reminders|default:"Session Reminders" }}</span>
+                                            <span>{{ translations.session_reminders_desc|default:"Remind me before upcoming sessions" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="notif-session-reminders" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="toggle-row" id="row-notif-new-programs" style="display:none;">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.new_programs|default:"New Programs" }}</span>
+                                            <span>{{ translations.new_programs_desc|default:"Notify me when new programs are available near me" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="notif-new-programs" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-section" style="border-bottom:none;">
+                                    <div class="setting-section-title">{{ translations.push_notifications|default:"Push Notifications" }}</div>
+                                    <div class="toggle-row">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.browser_notifications|default:"Browser Notifications" }}</span>
+                                            <span>{{ translations.browser_notifications_desc|default:"Show desktop push notifications for important updates" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="notif-browser">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="toggle-row">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.sound_alerts|default:"Sound Alerts" }}</span>
+                                            <span>{{ translations.sound_alerts_desc|default:"Play a sound for new notifications" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="notif-sound">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ═══════════ PRIVACY TAB ═══════════ -->
+                        <div class="settings-panel" id="panel-privacy">
+                            <div class="settings-panel-header">{{ translations.privacy|default:"Privacy" }}</div>
+
+                            <div class="settings-card">
+                                <div class="setting-section" style="padding-top:0;">
+                                    <div class="setting-section-title">{{ translations.data_privacy|default:"Data & Privacy" }}</div>
+                                    <div class="toggle-row">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.profile_visibility|default:"Profile Visibility" }}</span>
+                                            <span>{{ translations.profile_visibility_desc|default:"Allow other team members to see your profile details" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="privacy-profile-visibility" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="toggle-row">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.activity_status|default:"Activity Status" }}</span>
+                                            <span>{{ translations.activity_status_desc|default:"Show when you're active on the platform" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="privacy-activity-status" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="toggle-row">
+                                        <div class="toggle-label">
+                                            <span>{{ translations.usage_analytics|default:"Usage Analytics" }}</span>
+                                            <span>{{ translations.usage_analytics_desc|default:"Help us improve by sharing anonymous usage data" }}</span>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="privacy-usage-analytics">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-section" style="border-bottom:none;">
+                                    <div class="setting-section-title">{{ translations.legal|default:"Legal" }}</div>
+                                    <ul class="privacy-list">
+                                        <li class="privacy-item" onclick="window.open('/privacy-policy/', '_blank')">
+                                            <div class="privacy-item-left">
+                                                <i class="fa-solid fa-file-shield"></i>
+                                                <span>{{ translations.privacy_policy|default:"Privacy Policy" }}</span>
+                                            </div>
+                                            <i class="fa-solid fa-chevron-right"></i>
+                                        </li>
+                                        <li class="privacy-item" onclick="window.open('/terms-of-service/', '_blank')">
+                                            <div class="privacy-item-left">
+                                                <i class="fa-solid fa-file-contract"></i>
+                                                <span>{{ translations.terms_of_service|default:"Terms of Service" }}</span>
+                                            </div>
+                                            <i class="fa-solid fa-chevron-right"></i>
+                                        </li>
+                                        <li class="privacy-item" onclick="window.open('/cookie-policy/', '_blank')">
+                                            <div class="privacy-item-left">
+                                                <i class="fa-solid fa-cookie-bite"></i>
+                                                <span>{{ translations.cookie_policy|default:"Cookie Policy" }}</span>
+                                            </div>
+                                            <i class="fa-solid fa-chevron-right"></i>
+                                        </li>
+                                        <li class="privacy-item" id="download-data-btn">
+                                            <div class="privacy-item-left">
+                                                <i class="fa-solid fa-download"></i>
+                                                <span>{{ translations.download_my_data|default:"Download My Data" }}</span>
+                                            </div>
+                                            <i class="fa-solid fa-chevron-right"></i>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /settings-content -->
+                </div><!-- /settings-modal -->
+            </div><!-- /settings-modal-overlay -->
+        </main>
+    </div>
+
+    <script>
+        // Translations already injected in <head> — just reference them here
+        const T = window.__T__ || {};
+
+        /* Navigate back to the role-appropriate dashboard */
+        function goBackToDashboard() {
+            const dashboards = {
+                innovator: '/dashboard/',
+                ngo: '/dashboard-ngo/',
+                beneficiary: '/dashboard-beneficiary/',
+                admin: '/dashboard-admin/'
+            };
+            const u = window.__USER__;
+            window.location.href = (u && dashboards[u.role]) || '/dashboard/';
+        }
+
+        /* Tab switching */
+        function switchTab(tabName) {
+            document.querySelectorAll('.settings-nav-item').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+            document.querySelector(`.settings-nav-item[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(`panel-${tabName}`).classList.add('active');
+        }
+
+        /* Password show/hide */
+        function togglePassword(fieldId, btn) {
+            const field = document.getElementById(fieldId);
+            const icon = btn.querySelector('i');
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        let originalValues = {};
+
+        /* ─── Load real profile from backend ─── */
+        async function loadProfile() {
+            try {
+                const res = await fetch('/api/profile/');
+                if (!res.ok) return;
+                const data = await res.json();
+
+                // Split name into first/last
+                const parts = (data.name || '').split(' ');
+                document.getElementById('first-name').value = parts[0] || '';
+                document.getElementById('last-name').value = parts.slice(1).join(' ') || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('mobile').value = data.mobile || '';
+                document.getElementById('dob').value = data.dob || '';
+
+                // Organization — only populate if field exists (not beneficiary)
+                const orgField = document.getElementById('organization');
+                if (orgField && orgField.closest('.form-group').style.display !== 'none') {
+                    orgField.value = data.organization || '';
+                }
+
+                // Update header card
+                document.getElementById('profile-display-name').textContent = data.name || '';
+                document.getElementById('profile-display-email').textContent = data.email || '';
+                const initials = (data.name || 'U').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+                document.getElementById('profile-avatar-initials').childNodes[0].textContent = initials;
+
+                // Language
+                const langRadio = document.querySelector(`input[name="language"][value="${data.language || 'en'}"]`);
+                if (langRadio) langRadio.checked = true;
+            } catch (e) { console.warn('Profile load failed:', e); }
+        }
+
+        /* ─── Save profile to backend ─── */
+        async function saveProfile() {
+            const firstName = document.getElementById('first-name').value.trim();
+            const lastName = document.getElementById('last-name').value.trim();
+            const fullName = [firstName, lastName].filter(Boolean).join(' ');
+            const mobile = document.getElementById('mobile').value.trim();
+            const dob = document.getElementById('dob').value;
+
+            // Only include organization for non-beneficiary roles
+            const isBeneficiary = window.__USER__ && window.__USER__.role === 'beneficiary';
+            const payload = { name: fullName, mobile, dob };
+            if (!isBeneficiary) {
+                payload.organization = document.getElementById('organization').value.trim();
+            }
+
+            try {
+                const res = await fetch('/api/profile/', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    // Update settings profile card
+                    document.getElementById('profile-display-name').textContent = fullName;
+                    const initials = fullName.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+                    document.getElementById('profile-avatar-initials').childNodes[0].textContent = initials;
+
+                    // Update organization badge in profile header (non-beneficiary only)
+                    if (!isBeneficiary && payload.organization) {
+                        const roleSpan = document.getElementById('profile-role-badge');
+                        if (roleSpan) {
+                            roleSpan.innerHTML = `<i class="fa-solid fa-shield-halved" style="margin-right:0.3rem;font-size:0.65rem;"></i>${payload.organization}`;
+                        }
+                    }
+
+                    // ── Update navbar name LIVE across all pages ──
+                    const navNameEl = document.querySelector('.nav-user-profile .text-medium-sm');
+                    if (navNameEl) {
+                        // Preserve the role badge HTML, only update the name text
+                        const roleBadge = navNameEl.querySelector('.role-badge');
+                        if (roleBadge) {
+                            navNameEl.innerHTML = fullName + ' ' + roleBadge.outerHTML;
+                        } else {
+                            navNameEl.textContent = fullName;
+                        }
+                    }
+
+                    // ── Update localStorage so ALL pages get fresh data ──
+                    const stored = JSON.parse(localStorage.getItem('humanloop_user') || '{}');
+                    stored.name = fullName;
+                    if (payload.organization !== undefined) stored.organization = payload.organization;
+                    stored.mobile = mobile;
+                    if (dob) stored.dob = dob;
+                    localStorage.setItem('humanloop_user', JSON.stringify(stored));
+
+                    // Also update window.__USER__ for current page
+                    if (window.__USER__) {
+                        window.__USER__.name = fullName;
+                        if (payload.organization !== undefined) window.__USER__.organization = payload.organization;
+                    }
+
+                    showSettingToast(T.profile_updated || 'Profile updated successfully!', 'success');
+                } else {
+                    showSettingToast(data.error || T.save_failed || 'Save failed', 'error');
+                }
+            } catch (e) { showSettingToast(T.network_error || 'Network error', 'error'); }
+
+            cancelProfileEdit();
+        }
+
+        /* ─── Load & save notification settings ─── */
+        async function loadNotificationSettings() {
+            try {
+                const res = await fetch('/api/settings/notifications/');
+                if (!res.ok) return;
+                const d = await res.json();
+                const set = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+                set('notif-pilot-updates', d.notif_pilot_updates);
+                set('notif-email', d.notif_email);
+                set('notif-weekly-digest', d.notif_weekly_digest);
+                set('notif-team-activity', d.notif_team_activity);
+            } catch (e) { console.warn('Notification settings load failed:', e); }
+        }
+
+        async function saveNotificationSetting(key, value) {
+            try {
+                await fetch('/api/settings/notifications/', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [key]: value })
+                });
+                showSettingToast(T.profile_updated || 'Setting saved', 'success');
+            } catch (e) { showSettingToast(T.network_error || 'Network error', 'error'); }
+        }
+
+        /* ─── Load & save privacy settings ─── */
+        async function loadPrivacySettings() {
+            try {
+                const res = await fetch('/api/settings/privacy/');
+                if (!res.ok) return;
+                const d = await res.json();
+                const set = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+                set('privacy-profile-visibility', d.profile_visibility !== 'private');
+                set('privacy-activity-status', d.activity_status);
+                set('privacy-usage-analytics', d.usage_analytics);
+            } catch (e) { console.warn('Privacy settings load failed:', e); }
+        }
+
+        async function savePrivacySetting(key, value) {
+            try {
+                await fetch('/api/settings/privacy/', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [key]: value })
+                });
+                showSettingToast(T.profile_updated || 'Setting saved', 'success');
+            } catch (e) { showSettingToast(T.network_error || 'Network error', 'error'); }
+        }
+
+        /* ─── Change password ─── */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wire up change password button
+            const pwdBtn = document.getElementById('change-password-btn');
+            if (pwdBtn) {
+                pwdBtn.addEventListener('click', async () => {
+                    const current = document.getElementById('current-password').value;
+                    const newPwd = document.getElementById('new-password').value;
+                    const confirmPwd = document.getElementById('confirm-password').value;
+                    if (newPwd !== confirmPwd) { showSettingToast(T.passwords_no_match || 'Passwords do not match', 'error'); return; }
+                    if (newPwd.length < 8) { showSettingToast(T.password_min_length || 'Password must be 8+ chars', 'error'); return; }
+                    try {
+                        const res = await fetch('/api/change-password/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ current_password: current, new_password: newPwd })
+                        });
+                        const d = await res.json();
+                        showSettingToast(d.success ? (T.password_changed || 'Password changed!') : (d.error || 'Failed'), d.success ? 'success' : 'error');
+                        if (d.success) { document.getElementById('current-password').value=''; document.getElementById('new-password').value=''; document.getElementById('confirm-password').value=''; }
+                    } catch(e) { showSettingToast(T.network_error || 'Network error', 'error'); }
+                });
+            }
+
+            // Delete account button — calls real API
+            const delBtn = document.getElementById('delete-account-btn');
+            if (delBtn) {
+                delBtn.addEventListener('click', async () => {
+                    if (!confirm(T.delete_confirm || 'Are you sure you want to delete your account? This cannot be undone.')) return;
+                    // Double-confirm for safety
+                    if (!confirm('This will permanently deactivate your account and log you out. Proceed?')) return;
+                    try {
+                        const res = await fetch('/api/delete-account/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        const d = await res.json();
+                        if (d.success) {
+                            showSettingToast(T.account_deleted || 'Account deactivated. Redirecting...', 'success');
+                            localStorage.removeItem('humanloop_user');
+                            setTimeout(() => window.location.href = '/login/', 1500);
+                        } else {
+                            showSettingToast(d.error || 'Failed to delete account', 'error');
+                        }
+                    } catch (e) { showSettingToast(T.network_error || 'Network error', 'error'); }
+                });
+            }
+
+            // Download data button
+            const dlBtn = document.getElementById('download-data-btn');
+            if (dlBtn) {
+                dlBtn.addEventListener('click', async () => {
+                    if (confirm(T.download_confirm || 'This will download all your data as a ZIP file. Continue?')) {
+                        window.location.href = '/api/download-data/';
+                        showSettingToast(T.download_started || 'Download started!', 'success');
+                    }
+                });
+            }
+
+            // ═══ TWO-FACTOR AUTHENTICATION ═══
+            // Check initial 2FA state from server-injected user data
+            const twofaUser = window.__USER__;
+            const twofaDisabledState = document.getElementById('twofa-disabled-state');
+            const twofaEnabledState = document.getElementById('twofa-enabled-state');
+
+            function updateTwoFaUI(enabled) {
+                if (twofaDisabledState) twofaDisabledState.style.display = enabled ? 'none' : '';
+                if (twofaEnabledState) twofaEnabledState.style.display = enabled ? '' : 'none';
+            }
+
+            // Check 2FA status from profile API on load
+            (async function checkTwoFaStatus() {
+                try {
+                    const res = await fetch('/api/profile/');
+                    if (res.ok) {
+                        const d = await res.json();
+                        updateTwoFaUI(d.two_fa_enabled || false);
+                    }
+                } catch (e) {}
+            })();
+
+            // Setup 2FA: fetch QR code
+            const setupBtn = document.getElementById('twofa-setup-btn');
+            if (setupBtn) {
+                setupBtn.addEventListener('click', async () => {
+                    setupBtn.disabled = true;
+                    setupBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:0.4rem;"></i>Loading...';
+                    try {
+                        const res = await fetch('/api/2fa/setup/');
+                        const d = await res.json();
+                        if (d.success) {
+                            document.getElementById('twofa-qr-img').src = d.qr_code;
+                            document.getElementById('twofa-secret-key').textContent = d.secret;
+                            document.getElementById('twofa-setup-area').style.display = 'block';
+                            setupBtn.style.display = 'none';
+                        } else {
+                            showSettingToast(d.error || 'Failed to start 2FA setup', 'error');
+                            setupBtn.disabled = false;
+                            setupBtn.innerHTML = '<i class="fa-solid fa-qrcode" style="margin-right:0.4rem;"></i>Set Up 2FA';
+                        }
+                    } catch (e) {
+                        showSettingToast('Network error', 'error');
+                        setupBtn.disabled = false;
+                        setupBtn.innerHTML = '<i class="fa-solid fa-qrcode" style="margin-right:0.4rem;"></i>Set Up 2FA';
+                    }
+                });
+            }
+
+            // Verify setup code
+            const confirmBtn = document.getElementById('twofa-confirm-btn');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', async () => {
+                    const code = document.getElementById('twofa-verify-code').value.trim();
+                    const errEl = document.getElementById('twofa-setup-error');
+                    if (!code || code.length !== 6) {
+                        errEl.style.display = 'block';
+                        errEl.textContent = 'Please enter the 6-digit code from your authenticator app.';
+                        return;
+                    }
+                    errEl.style.display = 'none';
+                    confirmBtn.disabled = true;
+                    confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:0.3rem;"></i>Verifying...';
+                    try {
+                        const res = await fetch('/api/2fa/verify-setup/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ code })
+                        });
+                        const d = await res.json();
+                        if (d.success) {
+                            showSettingToast('🔒 Two-Factor Authentication enabled successfully!', 'success');
+                            updateTwoFaUI(true);
+                            document.getElementById('twofa-setup-area').style.display = 'none';
+                        } else {
+                            errEl.style.display = 'block';
+                            errEl.textContent = d.error || 'Verification failed';
+                            confirmBtn.disabled = false;
+                            confirmBtn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:0.3rem;"></i>Verify & Enable';
+                        }
+                    } catch (e) {
+                        errEl.style.display = 'block';
+                        errEl.textContent = 'Network error';
+                        confirmBtn.disabled = false;
+                        confirmBtn.innerHTML = '<i class="fa-solid fa-check" style="margin-right:0.3rem;"></i>Verify & Enable';
+                    }
+                });
+            }
+
+            // Disable 2FA: show form
+            const disableBtn = document.getElementById('twofa-disable-btn');
+            if (disableBtn) {
+                disableBtn.addEventListener('click', () => {
+                    document.getElementById('twofa-disable-area').style.display = 'block';
+                });
+            }
+
+            // Confirm disable
+            const disableConfirmBtn = document.getElementById('twofa-disable-confirm-btn');
+            if (disableConfirmBtn) {
+                disableConfirmBtn.addEventListener('click', async () => {
+                    const pass = document.getElementById('twofa-disable-password').value;
+                    const code = document.getElementById('twofa-disable-code').value.trim();
+                    const errEl = document.getElementById('twofa-disable-error');
+
+                    if (!pass) { errEl.style.display = 'block'; errEl.textContent = 'Password is required'; return; }
+                    if (!code || code.length !== 6) { errEl.style.display = 'block'; errEl.textContent = 'Enter the 6-digit code'; return; }
+                    errEl.style.display = 'none';
+                    disableConfirmBtn.disabled = true;
+                    disableConfirmBtn.textContent = 'Disabling...';
+                    try {
+                        const res = await fetch('/api/2fa/disable/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ password: pass, code })
+                        });
+                        const d = await res.json();
+                        if (d.success) {
+                            showSettingToast('2FA has been disabled', 'success');
+                            updateTwoFaUI(false);
+                            document.getElementById('twofa-disable-area').style.display = 'none';
+                            // Reset setup button for re-enable
+                            const sb = document.getElementById('twofa-setup-btn');
+                            if (sb) { sb.style.display = ''; sb.disabled = false; sb.innerHTML = '<i class="fa-solid fa-qrcode" style="margin-right:0.4rem;"></i>Set Up 2FA'; }
+                        } else {
+                            errEl.style.display = 'block';
+                            errEl.textContent = d.error || 'Failed to disable 2FA';
+                            disableConfirmBtn.disabled = false;
+                            disableConfirmBtn.textContent = 'Confirm Disable';
+                        }
+                    } catch (e) {
+                        errEl.style.display = 'block';
+                        errEl.textContent = 'Network error';
+                        disableConfirmBtn.disabled = false;
+                        disableConfirmBtn.textContent = 'Confirm Disable';
+                    }
+                });
+            }
+
+            // Language tab only for beneficiary
+            const u = window.__USER__;
+            if (u && u.role !== 'beneficiary') {
+                const langBtn = document.getElementById('lang-nav-btn');
+                if (langBtn) langBtn.style.display = 'none';
+            }
+
+            // ══ ROLE-BASED SETTINGS CUSTOMIZATION ══
+            if (u) {
+                const role = u.role;
+                const hide = id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; };
+                const show = id => { const el = document.getElementById(id); if (el) el.style.display = ''; };
+
+                if (role === 'beneficiary') {
+                    // Profile: hide Organization, show Location
+                    hide('field-organization');
+                    show('field-location');
+
+                    // Profile badge: show role label instead of org
+                    const badge = document.getElementById('profile-role-badge');
+                    if (badge) badge.innerHTML = '<i class="fa-solid fa-user-circle" style="margin-right:0.3rem;font-size:0.65rem;"></i>' + (T.beneficiary || 'Beneficiary');
+
+                    // Notifications: hide innovator/NGO options
+                    hide('row-notif-pilot');
+                    hide('row-notif-budget');
+                    hide('row-notif-team');
+
+                    // Notifications: show beneficiary options
+                    show('row-notif-program-updates');
+                    show('row-notif-session-reminders');
+                    show('row-notif-new-programs');
+
+                    // Relabel weekly report for beneficiary
+                    const weeklyRow = document.getElementById('row-notif-weekly');
+                    if (weeklyRow) {
+                        const spans = weeklyRow.querySelectorAll('.toggle-label span');
+                        if (spans[0]) spans[0].textContent = T.weekly_summary || 'Weekly Summary';
+                        if (spans[1]) spans[1].textContent = T.weekly_summary_desc || 'Receive a weekly summary of your program progress';
+                    }
+                } else if (role === 'ngo') {
+                    // NGOs don't manage budgets
+                    hide('row-notif-budget');
+
+                    // Profile badge: show organization or NGO Partner
+                    const badge = document.getElementById('profile-role-badge');
+                    if (badge && !u.organization) {
+                        badge.innerHTML = '<i class="fa-solid fa-building-ngo" style="margin-right:0.3rem;font-size:0.65rem;"></i>NGO Partner';
+                    }
+                } else if (role === 'admin') {
+                    // Admin sees everything — update badge
+                    const badge = document.getElementById('profile-role-badge');
+                    if (badge && !u.organization) {
+                        badge.innerHTML = '<i class="fa-solid fa-user-shield" style="margin-right:0.3rem;font-size:0.65rem;"></i>Administrator';
+                    }
+                }
+                // innovator sees everything as-is
+            }
+
+            // ── Wire notification toggles to backend ──
+            const notifMap = {
+                'notif-pilot-updates': 'notif_pilot_updates',
+                'notif-email': 'notif_email',
+                'notif-weekly-digest': 'notif_weekly_digest',
+                'notif-team-activity': 'notif_team_activity'
+            };
+            Object.entries(notifMap).forEach(([elId, key]) => {
+                const el = document.getElementById(elId);
+                if (el) el.addEventListener('change', () => saveNotificationSetting(key, el.checked));
+            });
+
+            // ── Wire privacy toggles to backend ──
+            const privVisEl = document.getElementById('privacy-profile-visibility');
+            if (privVisEl) privVisEl.addEventListener('change', () => savePrivacySetting('profile_visibility', privVisEl.checked ? 'team' : 'private'));
+
+            const privActEl = document.getElementById('privacy-activity-status');
+            if (privActEl) privActEl.addEventListener('change', () => savePrivacySetting('activity_status', privActEl.checked));
+
+            const privAnalEl = document.getElementById('privacy-usage-analytics');
+            if (privAnalEl) privAnalEl.addEventListener('change', () => savePrivacySetting('usage_analytics', privAnalEl.checked));
+
+            // Load all settings from backend
+            loadProfile();
+            loadNotificationSettings();
+            loadPrivacySettings();
+        });
+
+        function enableProfileEdit() {
+            const fields = document.querySelectorAll('.profile-field');
+            fields.forEach(f => { originalValues[f.id] = f.value; });
+            fields.forEach(f => {
+                if (f.tagName === 'SELECT') f.removeAttribute('disabled');
+                else f.removeAttribute('readonly');
+                f.classList.add('editing');
+            });
+            document.getElementById('profile-actions').style.display = 'flex';
+            document.getElementById('edit-profile-btn').style.display = 'none';
+            document.getElementById('avatar-edit-btn').style.display = 'flex';
+        }
+
+        function cancelProfileEdit() {
+            const fields = document.querySelectorAll('.profile-field');
+            fields.forEach(f => {
+                f.value = originalValues[f.id] !== undefined ? originalValues[f.id] : f.value;
+                if (f.tagName === 'SELECT') f.setAttribute('disabled', 'true');
+                else f.setAttribute('readonly', '');
+                f.classList.remove('editing');
+            });
+            document.getElementById('profile-actions').style.display = 'none';
+            document.getElementById('edit-profile-btn').style.display = 'inline-flex';
+            document.getElementById('avatar-edit-btn').style.display = 'none';
+        }
+
+        /* Language radio change handler */
+        document.querySelectorAll('input[name="language"]').forEach(radio => {
+            radio.addEventListener('change', async (e) => {
+                const selectedLang = e.target.value;
+                const langLabel = e.target.closest('label')?.querySelector('.language-name')?.textContent || selectedLang;
+                try {
+                    const res = await fetch('/api/settings/language/', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ language: selectedLang })
+                    });
+                    const d = await res.json();
+                    if (d.success) {
+                        // Update localStorage user record too
+                        const u = AuthManager.getUser();
+                        if (u) { u.language = selectedLang; localStorage.setItem(AuthManager.storageKey, JSON.stringify(u)); }
+
+                        showSettingToast(`${T.language_set_to || 'Language set to'} ${langLabel}. ${T.reloading || 'Reloading…'}`, 'success');
+                        // Reload after 1.2s so user sees the toast, then the page re-renders with new language
+                        setTimeout(() => location.reload(), 1200);
+                    } else {
+                        showSettingToast(d.error || 'Failed to save language', 'error');
+                    }
+                } catch(err) { showSettingToast(T.network_error || 'Network error', 'error'); }
+            });
+        });
+
+        /* Toast helper */
+        function showSettingToast(msg, type) {
+            let t = document.getElementById('settings-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'settings-toast';
+                t.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:99999;padding:0.75rem 1.25rem;border-radius:10px;font-size:0.9rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.15);transition:all 0.3s;';
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            t.style.background = type === 'success' ? '#0D9488' : '#ef4444';
+            t.style.color = '#fff';
+            t.style.opacity = '1';
+            setTimeout(() => { t.style.opacity = '0'; }, 3000);
+        }
+
+        function toggleSettingsSidebar() {
+            document.querySelector('.settings-sidebar').classList.toggle('open');
+        }
+    </script>
+
+</body>
+
+</html>
