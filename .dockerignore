@@ -1,0 +1,13 @@
+humanloop_backend/venv/
+humanloop_backend/__pycache__/
+humanloop_backend/core/__pycache__/
+humanloop_backend/core/migrations/__pycache__/
+humanloop_backend/staticfiles/
+humanloop_backend/media/
+humanloop_backend/.env
+AI/
+.git/
+.gitignore
+*.pyc
+.gemini/
+.agents/
