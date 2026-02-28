@@ -229,7 +229,7 @@ class Command(BaseCommand):
                         email=email,
                         defaults={
                             'name': name,
-                            'role': 'ngo',
+                            'role': 'innovator',  # NOT 'ngo' — they are staff, not NGO orgs
                             'organization': org_name,
                             'password': 'pbkdf2_sha256$720000$placeholder$not_a_real_password',
                         }

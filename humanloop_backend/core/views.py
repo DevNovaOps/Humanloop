@@ -170,6 +170,10 @@ def page_dashboard_admin(request):
     # Certificate issuance data
     ctx['beneficiary_users'] = User.objects.filter(role='beneficiary', is_active=True).order_by('name')
     ctx['all_pilots'] = Pilot.objects.all().order_by('-created_at')
+    # Pilot completion requests pending admin approval
+    ctx['completion_requests'] = Pilot.objects.filter(
+        status='pending_completion'
+    ).select_related('assigned_ngo', 'created_by').order_by('-updated_at')
     return render(request, 'dashboard-admin.html', ctx)
 
 
@@ -1294,13 +1298,127 @@ def api_pilot_detail(request, pilot_id):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
+        user = get_current_user(request)
+
+        # ── Handle completion request (NGO requests → pending_completion) ──
+        if data.get('status') == 'completed':
+            # Only NGO can request completion
+            if user.role not in ('ngo', 'admin'):
+                return JsonResponse({'error': 'Only the assigned NGO can request pilot completion.'}, status=403)
+
+            # Admin direct approval of pending_completion
+            if user.role == 'admin' and pilot.status == 'pending_completion':
+                pilot.status = 'completed'
+                pilot.save()
+                log_audit(user, 'Pilot completion approved', f'{pilot.title}', request)
+                # Notify NGO
+                if pilot.assigned_ngo:
+                    Notification.objects.create(
+                        user=pilot.assigned_ngo,
+                        title='Pilot Completion Approved',
+                        message=f'Admin has approved the completion of "{pilot.title}".',
+                        icon='fa-circle-check',
+                    )
+                # Notify innovator
+                Notification.objects.create(
+                    user=pilot.created_by,
+                    title='Pilot Completed',
+                    message=f'"{pilot.title}" has been officially marked as completed.',
+                    icon='fa-circle-check',
+                )
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Pilot completion approved by admin.',
+                    'status': pilot.status,
+                    'progress': pilot.progress,
+                })
+
+            # NGO requesting completion — validate conditions
+            errors = []
+
+            # Check 1: All tasks must be completed
+            tasks = pilot.tasks or []
+            if not tasks:
+                errors.append('No tasks found. Please add tasks before completing.')
+            else:
+                incomplete_tasks = [t.get('name', 'Unnamed') for t in tasks if not t.get('done')]
+                if incomplete_tasks:
+                    errors.append(f'{len(incomplete_tasks)} task(s) are still incomplete: {", ".join(incomplete_tasks[:5])}')
+
+            # Check 2: Budget must be fully allocated (spent >= 80% of budget)
+            spent = Expense.objects.filter(pilot=pilot).aggregate(total=Sum('amount'))['total'] or 0
+            budget = float(pilot.budget)
+            if budget > 0:
+                spent_pct = (float(spent) / budget) * 100
+                if spent_pct < 80:
+                    errors.append(
+                        f'Only {spent_pct:.0f}% of the budget has been allocated '
+                        f'(Rs.{float(spent):,.0f} of Rs.{budget:,.0f}). '
+                        f'At least 80% must be allocated before completion.'
+                    )
+            else:
+                errors.append('No budget set for this pilot.')
+
+            # If validation fails, return errors
+            if errors:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Cannot mark pilot as complete.',
+                    'reasons': errors,
+                }, status=400)
+
+            # All checks passed → set to pending_completion
+            pilot.status = 'pending_completion'
+            pilot.save()
+            log_audit(user, 'Pilot completion requested', f'{pilot.title}', request)
+
+            # Notify all admins
+            admins = User.objects.filter(role='admin', is_active=True)
+            for admin in admins:
+                Notification.objects.create(
+                    user=admin,
+                    title='Pilot Completion Request',
+                    message=f'NGO "{user.name}" has requested completion approval for "{pilot.title}". Please review.',
+                    icon='fa-clipboard-check',
+                )
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Completion request submitted. Waiting for admin approval.',
+                'status': pilot.status,
+                'progress': pilot.progress,
+            })
+
+        # ── Handle admin rejection of completion ──
+        if data.get('status') == 'active' and pilot.status == 'pending_completion':
+            if user.role != 'admin':
+                return JsonResponse({'error': 'Only admin can reject completion.'}, status=403)
+            pilot.status = 'active'
+            pilot.save()
+            log_audit(user, 'Pilot completion rejected', f'{pilot.title}', request)
+
+            rejection_reason = data.get('rejection_reason', 'No reason provided.')
+            if pilot.assigned_ngo:
+                Notification.objects.create(
+                    user=pilot.assigned_ngo,
+                    title='Pilot Completion Rejected',
+                    message=f'Admin has rejected the completion of "{pilot.title}". Reason: {rejection_reason}',
+                    icon='fa-times-circle',
+                )
+            return JsonResponse({
+                'success': True,
+                'message': 'Completion rejected. Pilot set back to active.',
+                'status': pilot.status,
+                'progress': pilot.progress,
+            })
+
+        # ── Normal updates (tasks, title, etc.) ──
         if 'status' in data:
             pilot.status = data['status']
         if 'title' in data:
             pilot.title = data['title']
         if 'tasks' in data:
             pilot.tasks = data['tasks']
-            # Auto-calculate progress from tasks
             tasks = data['tasks']
             if tasks:
                 done = sum(1 for t in tasks if t.get('done'))
@@ -1310,16 +1428,6 @@ def api_pilot_detail(request, pilot_id):
         if 'progress' in data and 'tasks' not in data:
             pilot.progress = data['progress']
         pilot.save()
-
-        user = get_current_user(request)
-        if data.get('status') == 'completed' and user:
-            log_audit(user, 'Pilot marked complete', f'{pilot.title}', request)
-            Notification.objects.create(
-                user=pilot.created_by,
-                title='Pilot Completed',
-                message=f'"{pilot.title}" has been marked as completed.',
-                icon='fa-circle-check',
-            )
 
         return JsonResponse({
             'success': True,

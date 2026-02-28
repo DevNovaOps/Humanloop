@@ -75,6 +75,7 @@ class Pilot(models.Model):
         ('pending_admin', 'Pending Admin Approval'),
         ('pending_payment', 'Pending Payment'),
         ('active', 'Active'),
+        ('pending_completion', 'Pending Completion Approval'),
         ('completed', 'Completed'),
         ('paused', 'Paused'),
     ]

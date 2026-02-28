@@ -83,7 +83,7 @@
             <div class="pilot-header-card">
                 <div>
                     <div class="pilot-meta-row">
-                        <span class="status-badge {% if pilot.status == 'active' %}progress{% elif pilot.status == 'completed' %}completed{% else %}draft{% endif %}">
+                        <span class="status-badge {% if pilot.status == 'active' %}progress{% elif pilot.status == 'completed' %}completed{% elif pilot.status == 'pending_completion' %}progress{% else %}draft{% endif %}" {% if pilot.status == 'pending_completion' %}style="background:rgba(245,158,11,0.12);color:#D97706;border-color:rgba(245,158,11,0.3);"{% endif %}>
                             <i class="fa-solid fa-circle" style="font-size: 0.5rem; margin-right: 0.3rem;"></i>
                             {{ pilot.get_status_display|upper }}
                         </span>
@@ -93,12 +93,16 @@
                     <p><i class="fa-solid fa-location-dot icon-margin-right"></i> <span id="pilot-location">{{ pilot.location }}</span></p>
                 </div>
                 <div id="pilot-actions">
-                    {% if pilot.status != 'completed' %}
+                    {% if pilot.status == 'active' and user.role == 'ngo' %}
                     <button id="complete-pilot-btn" class="btn btn-outline btn-sm" style="margin-left: 0.5rem;" 
                             onclick="markPilotComplete({{ pilot.id }})">
                         <i class="fa-solid fa-check icon-margin-right"></i> Mark Complete
                     </button>
-                    {% else %}
+                    {% elif pilot.status == 'pending_completion' %}
+                    <span class="status-badge" style="font-size:0.85rem;padding:0.5rem 1rem;background:rgba(245,158,11,0.12);color:#D97706;border:1px solid rgba(245,158,11,0.3);">
+                        <i class="fa-solid fa-clock" style="margin-right:0.3rem;"></i> Awaiting Admin Approval
+                    </span>
+                    {% elif pilot.status == 'completed' %}
                     <span class="status-badge completed" style="font-size:0.85rem;padding:0.5rem 1rem;">
                         <i class="fa-solid fa-check-circle" style="margin-right:0.3rem;"></i> Completed
                     </span>
@@ -253,7 +257,7 @@
         }
 
         async function markPilotComplete(pilotId) {
-            if (!confirm('Mark this pilot as completed? This cannot be undone easily.')) return;
+            if (!confirm('Request pilot completion? Admin will review and approve.\n\nRequirements:\n- All tasks must be completed\n- At least 80% of budget must be allocated')) return;
             try {
                 const res = await fetch(`/api/pilots/${pilotId}/`, {
                     method: 'PUT',
@@ -262,10 +266,18 @@
                 });
                 const data = await res.json();
                 if (data.success) {
+                    alert(data.message || 'Completion request submitted!');
                     location.reload();
+                } else {
+                    // Show validation errors
+                    let msg = data.error || 'Cannot complete pilot.';
+                    if (data.reasons && data.reasons.length > 0) {
+                        msg += '\n\n' + data.reasons.map((r, i) => (i + 1) + '. ' + r).join('\n');
+                    }
+                    alert(msg);
                 }
             } catch (e) {
-                alert('Failed to mark complete');
+                alert('Failed to mark complete. Network error.');
             }
         }
 

@@ -147,7 +147,52 @@
                 {% endif %}
             </div>
 
-            <!-- User Management Table -->
+            <!-- Pilot Completion Requests -->
+            <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
+                <h3 style="margin-bottom:1rem;">
+                    <i class="fa-solid fa-flag-checkered" style="margin-right:0.5rem;color:#0D9488;"></i>
+                    Pilot Completion Requests
+                    {% if completion_requests %}<span class="badge-count">{{ completion_requests|length }}</span>{% endif %}
+                </h3>
+
+                {% if completion_requests %}
+                {% for pilot in completion_requests %}
+                <div class="request-card" id="completion-{{ pilot.id }}">
+                    <div class="request-header">
+                        <div>
+                            <div class="request-title">{{ pilot.title }}</div>
+                            <div class="request-meta">
+                                <i class="fa-solid fa-building" style="margin-right:0.2rem;"></i>
+                                NGO: <strong>{{ pilot.assigned_ngo.name }}</strong>
+                                <span style="margin:0 0.3rem;">|</span>
+                                Innovator: <strong>{{ pilot.created_by.name }}</strong>
+                            </div>
+                            <div class="request-meta" style="margin-top:0.3rem;">
+                                <span style="margin-right:0.8rem;"><i class="fa-solid fa-location-dot" style="margin-right:0.2rem;"></i> {{ pilot.location }}</span>
+                                <span style="margin-right:0.8rem;"><i class="fa-solid fa-money-bill" style="margin-right:0.2rem;"></i> Budget: Rs.{{ pilot.budget|floatformat:"0" }}</span>
+                                <span><i class="fa-solid fa-chart-line" style="margin-right:0.2rem;"></i> Progress: {{ pilot.progress }}%</span>
+                            </div>
+                        </div>
+                        <span class="badge-pending" style="background:#fef3c7;color:#92400e;">Awaiting Approval</span>
+                    </div>
+                    <input type="text" class="notes-input" id="completion-notes-{{ pilot.id }}" placeholder="Add rejection reason (required if rejecting)...">
+                    <div class="request-actions">
+                        <button class="btn-approve" onclick="handleCompletion({{ pilot.id }}, 'approve')">
+                            <i class="fa-solid fa-check" style="margin-right:0.3rem;"></i> Approve Completion
+                        </button>
+                        <button class="btn-reject" onclick="handleCompletion({{ pilot.id }}, 'reject')">
+                            <i class="fa-solid fa-xmark" style="margin-right:0.3rem;"></i> Reject
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div style="text-align:center;padding:2rem;color:var(--text-muted);">
+                    <i class="fa-solid fa-check-circle" style="font-size:2rem;color:#0D9488;margin-bottom:0.5rem;display:block;"></i>
+                    No pending completion requests.
+                </div>
+                {% endif %}
+            </div>
             <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
                 <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-users-gear"
                         style="margin-right:0.5rem;color:#7c3aed;"></i>User Management</h3>
@@ -283,6 +328,46 @@
                 const data = await res.json();
                 if (data.success) {
                     const msg = data.message || (action === 'approve' ? 'Approved — Payment gateway opened for innovator' : 'Rejected');
+                    card.style.opacity = '0.5';
+                    card.innerHTML = '<div style="text-align:center;padding:1rem;color:' +
+                        (action === 'approve' ? '#0D9488' : '#ef4444') + ';font-weight:600;">' +
+                        '<i class="fa-solid ' + (action === 'approve' ? 'fa-check-circle' : 'fa-times-circle') + '" style="margin-right:0.3rem;"></i>' +
+                        msg + '</div>';
+                } else {
+                    alert(data.error || 'Action failed');
+                }
+            } catch (err) {
+                alert('Network error');
+            }
+        }
+
+        async function handleCompletion(pilotId, action) {
+            const notes = document.getElementById('completion-notes-' + pilotId)?.value || '';
+            const card = document.getElementById('completion-' + pilotId);
+
+            if (action === 'reject' && !notes.trim()) {
+                alert('Please provide a rejection reason.');
+                return;
+            }
+
+            const confirmMsg = action === 'approve'
+                ? 'Approve this pilot completion? It will be marked as officially completed.'
+                : 'Reject this completion request? The pilot will go back to active status.';
+            if (!confirm(confirmMsg)) return;
+
+            try {
+                const body = action === 'approve'
+                    ? { status: 'completed' }
+                    : { status: 'active', rejection_reason: notes };
+
+                const res = await fetch('/api/pilots/' + pilotId + '/', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const msg = data.message || (action === 'approve' ? 'Completion approved!' : 'Completion rejected.');
                     card.style.opacity = '0.5';
                     card.innerHTML = '<div style="text-align:center;padding:1rem;color:' +
                         (action === 'approve' ? '#0D9488' : '#ef4444') + ';font-weight:600;">' +
