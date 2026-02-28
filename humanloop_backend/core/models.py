@@ -182,6 +182,10 @@ class AuditLog(models.Model):
 class TeamMember(models.Model):
     ROLE_CHOICES = [
         ('lead', 'Team Lead'),
+        ('data_analyst', 'Data Analyst'),
+        ('budget_manager', 'Budget Manager'),
+        ('community_organizer', 'Community Organizer'),
+        ('field_coordinator', 'Field Coordinator'),
         ('member', 'Member'),
         ('volunteer', 'Volunteer'),
     ]
