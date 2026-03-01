@@ -450,26 +450,14 @@ def api_register(request):
             organization=organization,
         )
 
-        # Send welcome email
-        try:
-            send_mail(
-                'Welcome to HumanLoop',
-                f'Dear {user.name},\n\nThank you for signing up with HumanLoop! '
-                'We are excited to have you on board. You can now log in and start '
-                'making a social impact.\n\nBest regards,\nThe HumanLoop Team',
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=True,
-            )
-        except Exception:
-            pass
-
+        # Audit log (non-critical)
         try:
             log_audit(user, 'User registered', f'Role: {role}', request)
         except Exception:
-            pass  # Don't let audit logging crash registration
+            pass
 
-        return JsonResponse({
+        # Build response FIRST — don't let email block the response
+        response = JsonResponse({
             'success': True,
             'message': 'Registration successful',
             'user': {
@@ -479,6 +467,25 @@ def api_register(request):
                 'role': user.role,
             }
         })
+
+        # Send welcome email in background thread so it never blocks the response
+        import threading
+        def _send_welcome():
+            try:
+                send_mail(
+                    'Welcome to HumanLoop',
+                    f'Dear {user.name},\n\nThank you for signing up with HumanLoop! '
+                    'We are excited to have you on board. You can now log in and start '
+                    'making a social impact.\n\nBest regards,\nThe HumanLoop Team',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+        threading.Thread(target=_send_welcome, daemon=True).start()
+
+        return response
 
     except Exception as e:
         import logging
