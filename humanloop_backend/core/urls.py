@@ -76,4 +76,7 @@ urlpatterns = [
     # Stripe Payment Gateway
     path('api/payments/stripe/create-session/', views.api_stripe_create_session, name='api_stripe_create_session'),
     path('api/payments/stripe/success/', views.api_stripe_success, name='api_stripe_success'),
+
+    # Diagnostics
+    path('api/health/', views.api_health, name='api_health'),
 ]

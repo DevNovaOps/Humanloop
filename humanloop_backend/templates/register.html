@@ -220,10 +220,12 @@
                     btn.innerHTML = 'Get Started &rarr;';
                 }
             } catch (err) {
-                errorEl.textContent = 'Network error. Please check your connection and try again.';
+                // Could be a network error or a non-JSON response from the server
+                errorEl.textContent = 'Server error. Please try again in a moment.';
                 errorEl.style.display = 'block';
                 btn.disabled = false;
                 btn.innerHTML = 'Get Started &rarr;';
+                console.error('Registration error:', err);
             }
         });
     </script>

@@ -78,12 +78,19 @@ def user_context(request):
 
 def log_audit(user, action, details='', request=None):
     """Create an audit log entry."""
-    ip = None
-    if request:
-        ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR'))
-        if ip and ',' in ip:
-            ip = ip.split(',')[0].strip()
-    AuditLog.objects.create(user=user, action=action, details=details, ip_address=ip)
+    try:
+        ip = None
+        if request:
+            ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR'))
+            if ip and ',' in ip:
+                ip = ip.split(',')[0].strip()
+            # Truncate overly long IP values to avoid DB errors
+            if ip and len(ip) > 39:
+                ip = ip[:39]
+        AuditLog.objects.create(user=user, action=action, details=details, ip_address=ip)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f'log_audit failed: {e}')
 
 
 # ──────────────────────────────────────────────────────────
@@ -427,47 +434,59 @@ def api_register(request):
     if not re.match(password_regex, password):
         return JsonResponse({'error': 'Password must be 8+ chars with uppercase, lowercase, number, and special char'}, status=400)
 
-    if User.objects.filter(email=email).exists():
-        return JsonResponse({'error': 'Email already registered'}, status=400)
-
-    # Admin cannot be self-registered — only created via management command
-    if role not in ['innovator', 'ngo', 'beneficiary']:
-        role = 'innovator'
-
-    user = User.objects.create(
-        name=name,
-        email=email,
-        password=make_password(password),
-        role=role,
-        organization=organization,
-    )
-
-    # Send welcome email
     try:
-        send_mail(
-            'Welcome to HumanLoop',
-            f'Dear {user.name},\n\nThank you for signing up with HumanLoop! '
-            'We are excited to have you on board. You can now log in and start '
-            'making a social impact.\n\nBest regards,\nThe HumanLoop Team',
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=True,
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({'error': 'Email already registered'}, status=400)
+
+        # Admin cannot be self-registered — only created via management command
+        if role not in ['innovator', 'ngo', 'beneficiary']:
+            role = 'innovator'
+
+        user = User.objects.create(
+            name=name,
+            email=email,
+            password=make_password(password),
+            role=role,
+            organization=organization,
         )
-    except Exception:
-        pass
 
-    log_audit(user, 'User registered', f'Role: {role}', request)
+        # Send welcome email
+        try:
+            send_mail(
+                'Welcome to HumanLoop',
+                f'Dear {user.name},\n\nThank you for signing up with HumanLoop! '
+                'We are excited to have you on board. You can now log in and start '
+                'making a social impact.\n\nBest regards,\nThe HumanLoop Team',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
 
-    return JsonResponse({
-        'success': True,
-        'message': 'Registration successful',
-        'user': {
-            'id': user.id,
-            'name': user.name,
-            'email': user.email,
-            'role': user.role,
-        }
-    })
+        try:
+            log_audit(user, 'User registered', f'Role: {role}', request)
+        except Exception:
+            pass  # Don't let audit logging crash registration
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Registration successful',
+            'user': {
+                'id': user.id,
+                'name': user.name,
+                'email': user.email,
+                'role': user.role,
+            }
+        })
+
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.exception(f'Registration failed for {email}: {e}')
+        return JsonResponse({
+            'error': f'Registration failed: {str(e)}'
+        }, status=500)
 
 
 @csrf_exempt
@@ -3334,3 +3353,39 @@ def api_stripe_success(request):
     log_audit(user, 'Stripe payment completed', f'{pilot.title} — ₹{payment.total_amount}', request)
 
     return redirect('/dashboard/')
+
+
+@csrf_exempt
+def api_health(request):
+    """GET: Health check — diagnose DB and migration status."""
+    import django
+    checks = {
+        'django_version': django.get_version(),
+        'database': 'unknown',
+        'users_table': False,
+        'audit_logs_table': False,
+        'user_count': 0,
+    }
+    try:
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        checks['database'] = 'connected'
+    except Exception as e:
+        checks['database'] = f'error: {str(e)}'
+        return JsonResponse(checks, status=500)
+
+    try:
+        checks['user_count'] = User.objects.count()
+        checks['users_table'] = True
+    except Exception as e:
+        checks['users_table'] = f'error: {str(e)}'
+
+    try:
+        AuditLog.objects.count()
+        checks['audit_logs_table'] = True
+    except Exception as e:
+        checks['audit_logs_table'] = f'error: {str(e)}'
+
+    return JsonResponse(checks)
+
