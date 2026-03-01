@@ -23,7 +23,7 @@
     }
   },
   "deploy": {
-    "startCommand": "python manage.py migrate --no-input && python manage.py collectstatic --no-input && gunicorn humanloop_backend.wsgi --bind 0.0.0.0:$PORT",
+    "startCommand": "python manage.py migrate --no-input && python manage.py createsuperadmin --no-input && python manage.py collectstatic --no-input && gunicorn humanloop_backend.wsgi --bind 0.0.0.0:$PORT",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
