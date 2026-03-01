@@ -85,66 +85,6 @@
         </div>
     </section>
 
-    <!-- Watch Demo Section -->
-    <section id="how-it-works" class="section-white" style="padding:4rem 0;">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">See HumanLoop in Action</h2>
-                <p>Watch role-specific demos to see how Innovators, NGOs, and Beneficiaries use the platform.</p>
-            </div>
-
-            <!-- Demo Tabs -->
-            <div style="display:flex;justify-content:center;gap:0.75rem;margin-bottom:2rem;flex-wrap:wrap;" id="demo-tabs">
-                <button class="demo-tab active" onclick="switchDemo('innovator')" id="tab-innovator" style="padding:0.7rem 1.5rem;border-radius:12px;border:2px solid var(--primary);background:var(--primary);color:#fff;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.3s;">
-                    <i class="fa-solid fa-lightbulb" style="margin-right:0.4rem;"></i> Innovator
-                </button>
-                <button class="demo-tab" onclick="switchDemo('ngo')" id="tab-ngo" style="padding:0.7rem 1.5rem;border-radius:12px;border:2px solid var(--primary);background:transparent;color:var(--primary);font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.3s;">
-                    <i class="fa-solid fa-building" style="margin-right:0.4rem;"></i> NGO Partner
-                </button>
-                <button class="demo-tab" onclick="switchDemo('beneficiary')" id="tab-beneficiary" style="padding:0.7rem 1.5rem;border-radius:12px;border:2px solid var(--primary);background:transparent;color:var(--primary);font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.3s;">
-                    <i class="fa-solid fa-heart" style="margin-right:0.4rem;"></i> Beneficiary
-                </button>
-            </div>
-
-            <!-- Demo Video Container -->
-            <div style="max-width:900px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.15);border:2px solid var(--border-color);background:var(--bg-secondary);">
-                <!-- Role Description Bar -->
-                <div id="demo-description" style="padding:1rem 1.5rem;background:linear-gradient(135deg,#1A56DB,#0D9488);color:#fff;font-size:0.9rem;">
-                    <strong><i class="fa-solid fa-lightbulb" style="margin-right:0.4rem;"></i> Innovator Demo:</strong>
-                    Create pilots, set budgets, get AI-powered plans, and track NGO assignments.
-                </div>
-                <!-- Video -->
-                <div style="position:relative;width:100%;background:#000;">
-                    <img id="demo-video" src="{% static 'demos/innovator_demo.webp' %}" alt="HumanLoop Innovator Demo" style="width:100%;display:block;transition:opacity 0.2s ease;" />
-                </div>
-            </div>
-
-            <!-- Quick Feature Highlights -->
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:2.5rem;max-width:900px;margin-left:auto;margin-right:auto;">
-                <div style="text-align:center;padding:1rem;">
-                    <div style="width:50px;height:50px;border-radius:14px;background:rgba(26,86,219,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem;">
-                        <i class="fa-solid fa-rocket" style="font-size:1.2rem;color:#1A56DB;"></i>
-                    </div>
-                    <strong style="font-size:0.9rem;">Launch in Minutes</strong>
-                    <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem;">Create and deploy social pilots with AI-assisted planning</p>
-                </div>
-                <div style="text-align:center;padding:1rem;">
-                    <div style="width:50px;height:50px;border-radius:14px;background:rgba(13,148,136,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem;">
-                        <i class="fa-solid fa-handshake" style="font-size:1.2rem;color:#0D9488;"></i>
-                    </div>
-                    <strong style="font-size:0.9rem;">NGO Collaboration</strong>
-                    <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem;">Match with verified NGOs and manage teams seamlessly</p>
-                </div>
-                <div style="text-align:center;padding:1rem;">
-                    <div style="width:50px;height:50px;border-radius:14px;background:rgba(234,88,12,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem;">
-                        <i class="fa-solid fa-chart-pie" style="font-size:1.2rem;color:#EA580C;"></i>
-                    </div>
-                    <strong style="font-size:0.9rem;">Track Impact</strong>
-                    <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem;">Real-time dashboards for budgets, tasks, and beneficiary feedback</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Features Grid -->
     <section id="features" class="section-white">
@@ -322,58 +262,7 @@
         // Django-injected user data
         window.__USER__ = {{ user_json|safe }};
 
-        // Demo switcher
-        function switchDemo(role) {
-            const demos = {
-                innovator: {
-                    src: "{% static 'demos/innovator_demo.webp' %}",
-                    icon: 'fa-lightbulb',
-                    label: 'Innovator Demo:',
-                    desc: 'Create pilots, set budgets, get AI-powered plans, and track NGO assignments.'
-                },
-                ngo: {
-                    src: "{% static 'demos/ngo_demo.webp' %}",
-                    icon: 'fa-building',
-                    label: 'NGO Partner Demo:',
-                    desc: 'Manage assigned pilots, track expenses, coordinate teams, and submit completion.'
-                },
-                beneficiary: {
-                    src: "{% static 'demos/beneficiary_demo.webp' %}",
-                    icon: 'fa-heart',
-                    label: 'Beneficiary Demo:',
-                    desc: 'Explore programs, enroll in initiatives, and provide feedback in your language.'
-                }
-            };
 
-            const d = demos[role];
-            if (!d) return;
-
-            // Update video
-            const vid = document.getElementById('demo-video');
-            vid.style.opacity = '0';
-            setTimeout(() => {
-                vid.src = d.src;
-                vid.alt = 'HumanLoop ' + d.label;
-                vid.style.opacity = '1';
-            }, 200);
-
-            // Update description
-            document.getElementById('demo-description').innerHTML =
-                '<strong><i class="fa-solid ' + d.icon + '" style="margin-right:0.4rem;"></i> ' + d.label + '</strong> ' + d.desc;
-
-            // Update tab styles
-            document.querySelectorAll('.demo-tab').forEach(t => {
-                t.style.background = 'transparent';
-                t.style.color = 'var(--primary)';
-                t.classList.remove('active');
-            });
-            const activeTab = document.getElementById('tab-' + role);
-            if (activeTab) {
-                activeTab.style.background = 'var(--primary)';
-                activeTab.style.color = '#fff';
-                activeTab.classList.add('active');
-            }
-        }
     </script>
 </body>
 
