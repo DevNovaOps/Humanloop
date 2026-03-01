@@ -360,6 +360,10 @@ def page_about(request):
     return render(request, 'about.html', user_context(request))
 
 
+def page_demo(request):
+    return render(request, 'demo.html', user_context(request))
+
+
 def page_contact(request):
     return render(request, 'contact.html', user_context(request))
 

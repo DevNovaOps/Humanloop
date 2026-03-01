@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="system">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Demo - HumanLoop</title>
+    <meta name="description" content="Watch comprehensive demos of HumanLoop's features for Innovators, NGOs, and Beneficiaries.">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'index.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script defer src="{% static 'script.js' %}"></script>
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif; }
+
+        .demo-page-hero {
+            padding: 3rem 0 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(26,86,219,0.05), rgba(13,148,136,0.05));
+        }
+        .demo-page-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #1A56DB, #0D9488);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .demo-page-hero p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .demo-nav {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 60px;
+            z-index: 50;
+            padding: 1rem 0;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+        }
+        .demo-nav-btn {
+            padding: 0.6rem 1.25rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .demo-nav-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+        .demo-nav-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(26,86,219,0.3);
+        }
+        .demo-nav-btn .step-num {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+        .demo-nav-btn.active .step-num {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .demo-sections {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 1.5rem 3rem;
+        }
+
+        .demo-section {
+            margin-top: 3rem;
+            scroll-margin-top: 140px;
+        }
+        .demo-section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .demo-section-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .demo-section-header h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        .demo-section-header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0.2rem 0 0;
+        }
+
+        .demo-video-card {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+            background: var(--bg-secondary);
+        }
+        .demo-video-bar {
+            padding: 0.85rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        .demo-video-bar i { font-size: 0.9rem; }
+        .demo-video-bar .window-dots {
+            display: flex;
+            gap: 5px;
+            margin-right: 0.5rem;
+        }
+        .demo-video-bar .window-dots span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .demo-video-img {
+            width: 100%;
+            display: block;
+        }
+
+        .demo-features-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+        .demo-feature-chip {
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            font-size: 0.82rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .demo-feature-chip i {
+            font-size: 1rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .demo-workflow-section {
+            margin-top: 3.5rem;
+            padding: 2.5rem;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(26,86,219,0.04), rgba(13,148,136,0.04));
+            border: 1px solid var(--border-color);
+        }
+        .demo-workflow-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .workflow-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+        .workflow-step {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            border-radius: 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+        .workflow-step-num {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1A56DB, #0D9488);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+        }
+        .workflow-step h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+        .workflow-step p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .demo-cta {
+            text-align: center;
+            padding: 3rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .demo-cta h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .demo-cta p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+        .demo-cta .btn { padding: 0.8rem 2rem; font-size: 1rem; }
+
+        @media (max-width: 768px) {
+            .demo-page-hero h1 { font-size: 1.8rem; }
+            .demo-nav { gap: 0.3rem; }
+            .demo-nav-btn { padding: 0.5rem 0.8rem; font-size: 0.75rem; }
+            .demo-features-row { grid-template-columns: 1fr 1fr; }
+            .workflow-steps { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'index' %}" class="brand">
+                <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25 20V80M25 50H55C65 50 75 55 75 65V70C75 75 70 80 65 80H45" class="logo-stroke-blue"
+                        stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M55 20V50" class="logo-stroke-blue" stroke-width="10" stroke-linecap="round" />
+                    <path d="M75 40V25C75 20 70 15 65 15" class="logo-stroke-teal" stroke-width="10"
+                        stroke-linecap="round" />
+                    <circle cx="75" cy="40" r="5" class="logo-fill-teal" />
+                </svg>
+                <span class="brand-text">Human<span class="brand-accent">Loop</span></span>
+            </a>
+
+            <div class="nav-actions">
+                <div class="theme-toggle">
+                    <button data-theme-set="light" title="Light Mode"><i class="fa-solid fa-sun"></i></button>
+                    <button data-theme-set="dark" title="Dark Mode"><i class="fa-solid fa-moon"></i></button>
+                    <button data-theme-set="system" title="System" class="active"><i class="fa-solid fa-desktop"></i></button>
+                </div>
+                <a href="{% url 'index' %}" class="btn btn-secondary"><i class="fa-solid fa-arrow-left" style="margin-right:0.3rem;"></i> Back to Home</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="demo-page-hero">
+        <div class="container">
+            <div style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.4rem 1rem;border-radius:20px;background:rgba(26,86,219,0.08);color:#1A56DB;font-size:0.8rem;font-weight:600;margin-bottom:1rem;">
+                <i class="fa-solid fa-play-circle"></i> INTERACTIVE PLATFORM DEMOS
+            </div>
+            <h1>See Every Feature in Action</h1>
+            <p>Watch comprehensive walkthroughs for each role — from creating your first pilot to downloading completion certificates.</p>
+        </div>
+    </section>
+
+    <!-- Sticky Nav -->
+    <div class="demo-nav" id="demoNav">
+        <button class="demo-nav-btn active" onclick="scrollToDemo('create-pilot')">
+            <span class="step-num">1</span> <i class="fa-solid fa-plus-circle"></i> Create Pilot
+        </button>
+        <button class="demo-nav-btn" onclick="scrollToDemo('ngo-workflow')">
+            <span class="step-num">2</span> <i class="fa-solid fa-building"></i> NGO Management
+        </button>
+        <button class="demo-nav-btn" onclick="scrollToDemo('beneficiary-flow')">
+            <span class="step-num">3</span> <i class="fa-solid fa-heart"></i> Beneficiary
+        </button>
+    </div>
+
+    <!-- Demo Sections -->
+    <div class="demo-sections">
+
+        <!-- 1. Create Pilot -->
+        <div class="demo-section" id="create-pilot">
+            <div class="demo-section-header">
+                <div class="demo-section-icon" style="background:linear-gradient(135deg,#1A56DB,#3B82F6);">
+                    <i class="fa-solid fa-rocket"></i>
+                </div>
+                <div>
+                    <h2>Step 1: Innovator Creates a Pilot</h2>
+                    <p>Login as an Innovator → Fill the planner form → Get AI-generated plan → Select NGO → Launch pilot</p>
+                </div>
+            </div>
+            <div class="demo-video-card">
+                <div class="demo-video-bar" style="background:linear-gradient(135deg,#1A56DB,#3B82F6);">
+                    <div class="window-dots">
+                        <span style="background:#FF5F57;"></span>
+                        <span style="background:#FFBD2E;"></span>
+                        <span style="background:#27C93F;"></span>
+                    </div>
+                    <i class="fa-solid fa-lightbulb"></i> Innovator — Creating a Food Distribution Pilot in Vadodara
+                </div>
+                <img src="{% static 'demos/demo_create_pilot.webp' %}" alt="Create Pilot Demo" class="demo-video-img" loading="lazy" />
+            </div>
+            <div class="demo-features-row">
+                <div class="demo-feature-chip">
+                    <i class="fa-solid fa-wand-magic-sparkles" style="background:rgba(26,86,219,0.1);color:#1A56DB;"></i>
+                    <span>AI-Powered Plan Generation</span>
+                </div>
+                <div class="demo-feature-chip">
+                    <i class="fa-solid fa-list-check" style="background:rgba(13,148,136,0.1);color:#0D9488;"></i>
+                    <span>Automated Task Checklist</span>
+                </div>
+                <div class="demo-feature-chip">
+                    <i class="fa-solid fa-indian-rupee-sign" style="background:rgba(234,88,12,0.1);color:#EA580C;"></i>
+                    <span>Smart Budget Breakdown</span>
+                </div>
+                <div class="demo-feature-chip">
+                    <i class="fa-solid fa-users" style="background:rgba(147,51,234,0.1);color:#9333EA;"></i>
+                    <span>NGO Partner Matching</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. NGO Workflow -->
+        <div class="demo-section" id="ngo-workflow">
+            <div class="demo-section-header">
+                <div class="demo-section-icon" style="background:linear-gradient(135deg,#0D9488,#14B8A6);">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+                <div>
+                    <h2>Step 2: NGO Manages the Pilot</h2>
+                    <p>Accept assignment → Track expenses → Coordinate team → Manage tasks → Submit completion</p>
+                </div>
+            </div>
+            <div class="demo-video-card">
+                <div class="demo-video-bar" style="background:linear-gradient(135deg,#0D9488,#14B8A6);">
+                    <div class="window-dots">
+                        <span style="background:#FF5F57;"></span>
+                        <span style="background:#FFBD2E;"></span>
+                        <span style="background:#27C93F;"></span>
+                    </div>
+                    <i class="fa-solid fa-building"></i> NSS Vadodara — Pilot Management & Team Coordination
+                </div>
+                <img src="{% static 'demos/demo_ngo_workflow.webp' %}" alt="NGO Workflow Demo" class="demo-video-img" loading="lazy" />
+            </div>
+            <div class="demo-features-row">
+                <div class="demo-feature-chip">
+                    <i class="fa-solid fa-clipboard-list" style="background:rgba(13,148,136,0.1);color:#0D9488;"></i>
+                    <span>Assigned Pilot Tracking</span>
+                </div>
+                <div class="demo-feature-chip">
+                    <i class="fa-solid fa-receipt" style="background:rgba(234,88,12,0.1);color:#EA580C;"></i>
+                    <span>Expense Management</span>
+                </div>
+                <div class="demo-feature-chip">
+                    <i class="fa-solid fa-people-group" style="background:rgba(26,86,219,0.1);color:#1A56DB;"></i>
+                    <span>Team Member Coordination</span>
+                </div>
+                <div class="demo-feature-chip">
+                    <i class="fa-solid fa-flag-checkered" style="background:rgba(22,163,74,0.1);color:#16A34A;"></i>
+                    <span>Mark Pilot Complete</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Beneficiary Flow -->
+        <div class="demo-section" id="beneficiary-flow">
+            <div class="demo-section-header">
+                <div class="demo-section-icon" style="background:linear-gradient(135deg,#EA580C,#F97316);">
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+                <div>
+                    <h2>Step 3: Beneficiary Experience</h2>
+                    <p>Explore programs → Enroll in initiatives → Provide feedback → Multilingual support (Gujarati)</p>
+                </div>
+            </div>
+            <div class="demo-video-card">
+                <div class="demo-video-bar" style="background:linear-gradient(135deg,#EA580C,#F97316);">
+                    <div class="window-dots">
+                        <span style="background:#FF5F57;"></span>
+                        <span style="background:#FFBD2E;"></span>
+                        <span style="background:#27C93F;"></span>
+                    </div>
+                    <i class="fa-solid fa-heart"></i> Prachi Yagnik — Beneficiary Dashboard & Program Exploration
+                </div>
+                <img src="{% static 'demos/demo_beneficiary_flow.webp' %}" alt="Beneficiary Flow Demo" class="demo-video-img" loading="lazy" />
+            </div>
+            <div class="demo-features-row">
+                <div class="demo-feature-chip">
+                    <i class="fa-solid fa-search" style="background:rgba(234,88,12,0.1);color:#EA580C;"></i>
+                    <span>Explore Available Programs</span>
+                </div>
+                <div class="demo-feature-chip">
+                    <i class="fa-solid fa-hand-pointer" style="background:rgba(26,86,219,0.1);color:#1A56DB;"></i>
+                    <span>One-Click Enrollment</span>
+                </div>
+                <div class="demo-feature-chip">
+                    <i class="fa-solid fa-comment-dots" style="background:rgba(13,148,136,0.1);color:#0D9488;"></i>
+                    <span>Submit Feedback</span>
+                </div>
+                <div class="demo-feature-chip">
+                    <i class="fa-solid fa-language" style="background:rgba(147,51,234,0.1);color:#9333EA;"></i>
+                    <span>Multilingual Interface</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow Overview -->
+        <div class="demo-workflow-section">
+            <h2><i class="fa-solid fa-diagram-project" style="color:#1A56DB;margin-right:0.5rem;"></i> End-to-End Workflow</h2>
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="workflow-step-num">1</div>
+                    <h4>🔆 Innovator Plans</h4>
+                    <p>Creates pilot with AI-generated plan, budget, tasks</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="workflow-step-num">2</div>
+                    <h4>🤝 NGO Matched</h4>
+                    <p>AI recommends NGOs based on location & expertise</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="workflow-step-num">3</div>
+                    <h4>🏗️ NGO Executes</h4>
+                    <p>NGO manages tasks, expenses, and team coordination</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="workflow-step-num">4</div>
+                    <h4>❤️ Beneficiaries Join</h4>
+                    <p>Community members enroll and provide feedback</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="workflow-step-num">5</div>
+                    <h4>🏆 Complete & Certify</h4>
+                    <p>Pilot completed, impact measured, certificates issued</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="demo-cta">
+            <h3>Ready to create your first pilot?</h3>
+            <p>Join 5,000+ community leaders making a measurable difference.</p>
+            <a href="{% url 'register' %}" class="btn btn-primary"><i class="fa-solid fa-rocket" style="margin-right:0.4rem;"></i> Get Started for Free</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-copyright">
+                &copy; 2026 HumanLoop Inc. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Django-injected user data
+        window.__USER__ = {{ user_json|safe }};
+
+        function scrollToDemo(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+                // Update nav active state
+                document.querySelectorAll('.demo-nav-btn').forEach(b => b.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+            }
+        }
+
+        // Update active nav button on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    document.querySelectorAll('.demo-nav-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.getAttribute('onclick')?.includes(id)) {
+                            btn.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, { threshold: 0.3 });
+
+        document.querySelectorAll('.demo-section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+
+</html>

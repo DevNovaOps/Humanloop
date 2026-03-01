@@ -18,6 +18,7 @@ urlpatterns = [
     path('explore-programs/', views.page_explore_programs, name='explore_programs'),
     path('settings/', views.page_settings, name='settings'),
     path('about/', views.page_about, name='about'),
+    path('demo/', views.page_demo, name='demo'),
     path('contact/', views.page_contact, name='contact'),
     path('privacy-policy/', views.page_privacy_policy, name='privacy_policy'),
     path('terms-of-service/', views.page_terms_of_service, name='terms_of_service'),
