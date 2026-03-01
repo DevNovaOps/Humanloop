@@ -3396,3 +3396,63 @@ def api_health(request):
 
     return JsonResponse(checks)
 
+
+# ──────────────────────────────────────────────────────────
+# One-Time Admin Setup Endpoint
+# ──────────────────────────────────────────────────────────
+
+def api_setup_admin(request, token):
+    """
+    GET /api/setup-admin/<token>/
+    Secret one-time endpoint to create or reset the admin user.
+    Protected by a secret token — only works if the token matches.
+    Safe to keep deployed — useless without the token.
+    """
+    import os
+    SECRET = os.getenv('SETUP_ADMIN_TOKEN', 'hl-setup-2024-railway')
+    if token != SECRET:
+        from django.http import Http404
+        raise Http404
+
+    email    = request.GET.get('email', 'admin@humanloop.com')
+    password = request.GET.get('password', 'Admin@123!')
+    name     = request.GET.get('name', 'HumanLoop Admin')
+
+    try:
+        existing = User.objects.filter(role='admin').first()
+        if existing:
+            existing.email    = email
+            existing.name     = name
+            existing.password = make_password(password)
+            existing.is_active = True
+            existing.verified  = True
+            existing.save()
+            return JsonResponse({
+                'status': 'updated',
+                'message': f'Admin account updated. Email: {email}',
+            })
+
+        # Check if email is taken by non-admin
+        if User.objects.filter(email=email).exclude(role='admin').exists():
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Email {email} is already used by a non-admin user.',
+            }, status=400)
+
+        admin = User.objects.create(
+            name=name,
+            email=email,
+            password=make_password(password),
+            role='admin',
+            organization='HumanLoop',
+            verified=True,
+            is_active=True,
+        )
+        return JsonResponse({
+            'status': 'created',
+            'message': f'Admin created successfully! Email: {email} | ID: {admin.id}',
+        })
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+

@@ -79,4 +79,7 @@ urlpatterns = [
 
     # Diagnostics
     path('api/health/', views.api_health, name='api_health'),
+
+    # One-time admin setup (token-protected)
+    path('api/setup-admin/<str:token>/', views.api_setup_admin, name='api_setup_admin'),
 ]
