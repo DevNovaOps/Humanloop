@@ -1,25 +1,25 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0D1526,50:00FF41,100:39FF14&height=210&section=header&text=HumanLoop&fontSize=80&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Social%20Pilot%20Management%20%C2%B7%20AI-Powered%20Impact&descAlignY=56&descSize=18" width="100%" alt="HumanLoop banner" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f172a,50:1A56DB,100:0D9488&height=210&section=header&text=HumanLoop&fontSize=80&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Social%20Pilot%20Management%20%C2%B7%20AI-Powered%20Impact&descAlignY=56&descSize=18" width="100%" alt="HumanLoop banner" />
 
 <br/>
 
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3200&pause=900&color=00FF41&center=true&vCenter=true&multiline=true&repeat=true&width=760&height=120&lines=AI-Powered+Pilot+Planning+%C2%B7+Smart+NGO+Matching;Razorpay+%2B+Stripe+Payments+%C2%B7+RAG+Intelligence;Role-Based+Dashboards+%C2%B7+2FA+%C2%B7+Multilingual+UI)](https://github.com/)
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3200&pause=900&color=3B82F6&center=true&vCenter=true&multiline=true&repeat=true&width=760&height=120&lines=AI-Powered+Pilot+Planning+%C2%B7+Smart+NGO+Matching;Razorpay+%2B+Stripe+Payments+%C2%B7+RAG+Intelligence;Role-Based+Dashboards+%C2%B7+2FA+%C2%B7+Multilingual+UI)](https://github.com/)
 
 <br/>
 
 <a href="https://humanloop-production-839d.up.railway.app">
-  <img src="https://img.shields.io/badge/%F0%9F%9A%80_LIVE_DEMO-RAILWAY-00FF41?style=for-the-badge&labelColor=0a0f0d" alt="Live Demo"/>
+  <img src="https://img.shields.io/badge/%F0%9F%9A%80_LIVE_DEMO-RAILWAY-1A56DB?style=for-the-badge&labelColor=0f172a" alt="Live Demo"/>
 </a>
 
 <br/><br/>
 
-<img src="https://img.shields.io/badge/Backend-Django_4.2-00FF41?style=for-the-badge&logo=django&logoColor=white&labelColor=0a0f0d" alt="Django"/>
-<img src="https://img.shields.io/badge/DB-MySQL_8.0-39FF14?style=for-the-badge&logo=mysql&logoColor=white&labelColor=0a0f0d" alt="DB"/>
-<img src="https://img.shields.io/badge/AI-Ollama+RAG-00FF41?style=for-the-badge&logo=ai&logoColor=white&labelColor=0a0f0d" alt="AI"/>
-<img src="https://img.shields.io/badge/Payments-Razorpay+Stripe-39FF14?style=for-the-badge&logo=stripe&logoColor=white&labelColor=0a0f0d" alt="Payments"/>
-<img src="https://img.shields.io/badge/Frontend-JS+HTML+CSS-00FF41?style=for-the-badge&logo=javascript&logoColor=black&labelColor=0a0f0d" alt="Frontend"/>
-<img src="https://img.shields.io/badge/Deploy-Railway+Docker-39FF14?style=for-the-badge&logo=railway&logoColor=white&labelColor=0a0f0d" alt="Deploy"/>
+<img src="https://img.shields.io/badge/Backend-Django_4.2-1A56DB?style=for-the-badge&logo=django&logoColor=white&labelColor=0f172a" alt="Django"/>
+<img src="https://img.shields.io/badge/DB-MySQL_8.0-0D9488?style=for-the-badge&logo=mysql&logoColor=white&labelColor=0f172a" alt="DB"/>
+<img src="https://img.shields.io/badge/AI-Ollama+RAG-1A56DB?style=for-the-badge&logo=ai&logoColor=white&labelColor=0f172a" alt="AI"/>
+<img src="https://img.shields.io/badge/Payments-Razorpay+Stripe-0D9488?style=for-the-badge&logo=stripe&logoColor=white&labelColor=0f172a" alt="Payments"/>
+<img src="https://img.shields.io/badge/Frontend-JS+HTML+CSS-1A56DB?style=for-the-badge&logo=javascript&logoColor=white&labelColor=0f172a" alt="Frontend"/>
+<img src="https://img.shields.io/badge/Deploy-Railway+Docker-0D9488?style=for-the-badge&logo=railway&logoColor=white&labelColor=0f172a" alt="Deploy"/>
 
 <br/><br/>
 
@@ -218,12 +218,12 @@ HumanLoop addresses this by providing:
 
 <div align="center">
 
-<img src="https://img.shields.io/badge/Python-3.13-00FF41?style=for-the-badge&logo=python&logoColor=white&labelColor=0a0f0d" alt="Python"/>
-<img src="https://img.shields.io/badge/Django-4.2.28-39FF14?style=for-the-badge&logo=django&logoColor=white&labelColor=0a0f0d" alt="Django"/>
-<img src="https://img.shields.io/badge/MySQL-8.0-00FF41?style=for-the-badge&logo=mysql&logoColor=white&labelColor=0a0f0d" alt="MySQL"/>
-<img src="https://img.shields.io/badge/Ollama-qwen2:0.5b-39FF14?style=for-the-badge&logo=ai&logoColor=white&labelColor=0a0f0d" alt="Ollama"/>
-<img src="https://img.shields.io/badge/FAISS-Vector_Search-00FF41?style=for-the-badge&logo=meta&logoColor=white&labelColor=0a0f0d" alt="FAISS"/>
-<img src="https://img.shields.io/badge/Razorpay-Payments-39FF14?style=for-the-badge&logo=razorpay&logoColor=white&labelColor=0a0f0d" alt="Razorpay"/>
+<img src="https://img.shields.io/badge/Python-3.13-1A56DB?style=for-the-badge&logo=python&logoColor=white&labelColor=0f172a" alt="Python"/>
+<img src="https://img.shields.io/badge/Django-4.2.28-0D9488?style=for-the-badge&logo=django&logoColor=white&labelColor=0f172a" alt="Django"/>
+<img src="https://img.shields.io/badge/MySQL-8.0-1A56DB?style=for-the-badge&logo=mysql&logoColor=white&labelColor=0f172a" alt="MySQL"/>
+<img src="https://img.shields.io/badge/Ollama-qwen2:0.5b-0D9488?style=for-the-badge&logo=ai&logoColor=white&labelColor=0f172a" alt="Ollama"/>
+<img src="https://img.shields.io/badge/FAISS-Vector_Search-1A56DB?style=for-the-badge&logo=meta&logoColor=white&labelColor=0f172a" alt="FAISS"/>
+<img src="https://img.shields.io/badge/Razorpay-Payments-0D9488?style=for-the-badge&logo=razorpay&logoColor=white&labelColor=0f172a" alt="Razorpay"/>
 
 </div>
 
@@ -744,16 +744,16 @@ docker run -p 8000:8000 --env-file humanloop_backend/.env humanloop
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0D1526,50:00FF41,100:39FF14&height=120&section=footer" width="100%" alt="Footer" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f172a,50:1A56DB,100:0D9488&height=120&section=footer" width="100%" alt="Footer" />
 
 <br/>
 
-<i>Built with 💚 by the HumanLoop Team</i>
+<i>Built with 💙 by the HumanLoop Team</i>
 
 <br/><br/>
 
-<img src="https://img.shields.io/badge/LICENSE-MIT-00FF41?style=flat-square&labelColor=0a0f0d" alt="License"/>
-<img src="https://img.shields.io/badge/STATUS-ACTIVE-39FF14?style=flat-square&labelColor=0a0f0d" alt="Status"/>
-<img src="https://img.shields.io/badge/PRs-WELCOME-00FF41?style=flat-square&labelColor=0a0f0d" alt="PRs"/>
+<img src="https://img.shields.io/badge/LICENSE-MIT-1A56DB?style=flat-square&labelColor=0f172a" alt="License"/>
+<img src="https://img.shields.io/badge/STATUS-ACTIVE-0D9488?style=flat-square&labelColor=0f172a" alt="Status"/>
+<img src="https://img.shields.io/badge/PRs-WELCOME-1A56DB?style=flat-square&labelColor=0f172a" alt="PRs"/>
 
 </div>
