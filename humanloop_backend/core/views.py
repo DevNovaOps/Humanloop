@@ -6,7 +6,6 @@ import json
 import random
 import re
 from datetime import timedelta, datetime as dt
-
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password, check_password

@@ -67,19 +67,12 @@ urlpatterns = [
     path('api/2fa/verify-setup/', views.api_2fa_verify_setup, name='api_2fa_verify_setup'),
     path('api/2fa/disable/', views.api_2fa_disable, name='api_2fa_disable'),
     path('api/2fa/verify-login/', views.api_2fa_verify_login, name='api_2fa_verify_login'),
-    # Payment Gateway
     path('api/payments/create-order/', views.api_payment_create_order, name='api_payment_create_order'),
     path('api/payments/verify/', views.api_payment_verify, name='api_payment_verify'),
     path('api/payments/simulate-test/', views.api_payment_simulate_test, name='api_payment_simulate_test'),
     path('api/payments/<int:assignment_id>/status/', views.api_payment_status, name='api_payment_status'),
-
-    # Stripe Payment Gateway
     path('api/payments/stripe/create-session/', views.api_stripe_create_session, name='api_stripe_create_session'),
     path('api/payments/stripe/success/', views.api_stripe_success, name='api_stripe_success'),
-
-    # Diagnostics
     path('api/health/', views.api_health, name='api_health'),
-
-    # One-time admin setup (token-protected)
     path('api/setup-admin/<str:token>/', views.api_setup_admin, name='api_setup_admin'),
 ]
